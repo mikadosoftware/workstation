@@ -24,6 +24,13 @@ RUN apt-get update && \
                        software-properties-common \
                        wget \
                        x11-apps
+		       
+### Things nice to have on workstation
+RUN apt-get install -y inetutils-ping \
+                       firefox \
+		       chromium-browser \
+		       firefoxdriver chromium-chromedriver
+		       
 
 ###### symlinking to have `pip` and `python`
 RUN cd /usr/bin \
@@ -98,10 +105,13 @@ COPY rcassets/.pylintrc $USERHOME
 COPY rcassets/.gitconfig $USERHOME
 COPY rcassets/.ssh $USERHOME/.ssh
 COPY rcassets/.emacs.d $USERHOME/.emacs.d
-#
 COPY rcassets/ENTRYPOINT.sh $USERHOME
 COPY rcassets/ENTRYPOINT.sh $USERHOME
+
 RUN chmod 0777 $USERHOME/ENTRYPOINT.sh
+COPY rcassets/requirements.txt $USERHOME
+RUN pip install -r $USERHOME/requirements.txt 
+
  
 EXPOSE 22
 ENTRYPOINT ["/home/pbrian/ENTRYPOINT.sh"]
