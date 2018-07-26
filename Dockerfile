@@ -23,14 +23,8 @@ RUN apt-get update && \
                        python3.6-dev \
                        software-properties-common \
                        wget \
-                       x11-apps
-		       
-### Things nice to have on workstation
-RUN apt-get install -y inetutils-ping \
-                       firefox \
-		       chromium-browser \
-		       firefoxdriver chromium-chromedriver
-		       
+                       x11-apps \
+                       firefox 
 
 ###### symlinking to have `pip` and `python`
 RUN cd /usr/bin \
@@ -71,6 +65,19 @@ RUN pip install --trusted-host pypi.python.org sphinx \
                                                pytest \
 					       pylint
 
+###
+# proc-gmail
+
+
+### Setup the developer env I want in Python
+#RUN cd $WKDIR
+RUN mkdir $WKDIR
+COPY build/requirements.txt $WKDIR/
+RUN ls -lh
+RUN pip install -r $WKDIR/requirements.txt
+RUN pip install --upgrade google-api-python-client
+
+
 ### end python
 
 ### Create SSH access to box
@@ -105,13 +112,10 @@ COPY rcassets/.pylintrc $USERHOME
 COPY rcassets/.gitconfig $USERHOME
 COPY rcassets/.ssh $USERHOME/.ssh
 COPY rcassets/.emacs.d $USERHOME/.emacs.d
+#
 COPY rcassets/ENTRYPOINT.sh $USERHOME
 COPY rcassets/ENTRYPOINT.sh $USERHOME
-
 RUN chmod 0777 $USERHOME/ENTRYPOINT.sh
-COPY rcassets/requirements.txt $USERHOME
-RUN pip install -r $USERHOME/requirements.txt 
-
  
 EXPOSE 22
 ENTRYPOINT ["/home/pbrian/ENTRYPOINT.sh"]

@@ -2,36 +2,31 @@
 Docker Workstation Anywhere
 ===========================
 
-tl;dr
-=====
+The concept of an *immutable server* for prodiction deployment is now
+fully mainstream, but the same concepts underpinning servers is less
+applied to the workstations on which the developers work.
 
-`sh rebuild-rerun.sh` will build dockerfile locally, and run the docker
-locally and log me in via ssh. I can then use X commands as needed.
+We have a tendancy to start with a nice clean laptop, a Mac if we are
+lucky, and slowly but surely *stuff* creeps on, dependancies we did
+not know about appear and we stop trusting our main tool.
+
+So I have used Docker to make my own "immutable" workstation.  It is the same
+stack running on my banged-about-on-commute laptop, my wife's nice big screen iMac
+and even on my client's Windows box, that I had to use for policy reasons.
+
+I use X-Forwarding to run the same visual tools, configured the same way, on
+any box I am working on, and *anything* that changes I keep in source control
+(or on a secure key).
+
+This workstation has a few rules
+
+* The build is automated - no manual steps involved.
+* I have to be able to precisely define what is on there and how it is configured.
+* I have to be able to re-create it exactly
+* If I restart, all state is reset (this is not as crazy as it sounds)
+* It needs to be secure
 
 
-
-
-Using Docker as run-anywhere developer environment
-==================================================
-
-One of the basic principles of running software in production is to be
-clear and precise about the software and versions on top of which ones
-code will be running.  This also is true for the *workstation* on
-which one *develops* the code - I think it is crazy to just accept
-whatever happens to be on a given distro.
-
-So enter Docker.  We can spin up a plain old distro on our laptop, and
-*then* build a new Docker instance of the exact perfect developer
-machine we want.  On top of this we can then use ssh and X-Forwarding
-to have a X-ready app (such as an IDE, or web browser) run on the
-ideal machine, but have the X portion appear on our desktop.
-
-This means we can build the perfect environment and run it on any
-location.
-
-I have used this approach on Linux laptops & Windows desktops, giving
-me a consistent developer environment plus access to Linux tools even
-on a non-Linux OS.
 
 
 The bare bones
