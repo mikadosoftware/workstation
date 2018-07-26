@@ -27,7 +27,7 @@ mccabe==0.6.1
 MiniMock==1.2.8
 #mkrepo==0.0.0
 more-itertools==4.1.0
-paramiko==1.17.2
+paramiko==1.17.6
 pluggy==0.6.0
 purepng==0.2.0
 py==1.5.3
