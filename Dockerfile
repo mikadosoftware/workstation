@@ -22,10 +22,10 @@ RUN apt-get update && \
                        python3.6 \
                        python3.6-dev \
                        software-properties-common \
-                       wget \
+                       wget curl \
                        x11-apps \
-                       firefox 
-
+                       firefox
+		       
 ###### symlinking to have `pip` and `python`
 RUN cd /usr/bin \
        && ln -sf python3.6 python \
@@ -36,8 +36,9 @@ RUN cd /usr/bin \
 # 18.04 does not have it but get-pip expects it
 RUN apt-get install -y python3-distutils python3-distlib 
 
-ENV PYTHON_PIP_VERSION 10.0.1
 
+ENV PYTHON_PIP_VERSION 18.0
+RUN ls -l
 RUN set -ex; \
 	\
 	wget -O get-pip.py 'https://bootstrap.pypa.io/get-pip.py'; \
@@ -72,7 +73,7 @@ RUN pip install --trusted-host pypi.python.org sphinx \
 ### Setup the developer env I want in Python
 #RUN cd $WKDIR
 RUN mkdir $WKDIR
-COPY build/requirements.txt $WKDIR/
+COPY rcassets/requirements.txt $WKDIR/
 RUN ls -lh
 RUN pip install -r $WKDIR/requirements.txt
 RUN pip install --upgrade google-api-python-client
@@ -89,6 +90,11 @@ RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
 RUN sed -ri 's/^#AllowTcpForwarding\s+.*/AllowTcpForwarding yes/g' /etc/ssh/sshd_config
 RUN sed -ri 's/^#X11Forwarding\s+.*/X11Forwarding yes/g' /etc/ssh/sshd_config
 RUN sed -ri 's/^#X11UseLocalhost\s+.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
+
+### Other Dev Tools
+## Node and React
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+RUN apt-get install -y nodejs
 
 
 #################### Misc config ##########################
@@ -116,7 +122,34 @@ COPY rcassets/.emacs.d $USERHOME/.emacs.d
 COPY rcassets/ENTRYPOINT.sh $USERHOME
 COPY rcassets/ENTRYPOINT.sh $USERHOME
 RUN chmod 0777 $USERHOME/ENTRYPOINT.sh
- 
+
+# seems ubunut installs pip_internal again mucking things up
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install pygithub
+RUN rm /usr/bin/python
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+ENV TZ=Europe/London
+#not ideal
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get install -y tzdata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive && \
+    apt-get install -y texlive-base \
+                       texlive-latex-recommended \
+                       texlive-latex-extra \
+                       texlive-fonts-recommended \
+                       texlive-fonts-extra \
+                       texlive-latex-base \
+                       texlive-font-utils 
+# Spacy
+RUN python -m spacy download en
+
+#TODO:
+#debconf-set-selections for all debconf issues
+
+COPY rcassets/.emacs $USERHOME
+
 EXPOSE 22
 ENTRYPOINT ["/home/pbrian/ENTRYPOINT.sh"]
-#CMD ["/usr/sbin/sshd", "-D"]
