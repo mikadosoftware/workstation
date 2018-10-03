@@ -5,10 +5,6 @@ LABEL Name="pbriandev" Version=0.0.1
 ### Constants
 ENV WKDIR /staging
 ENV USERHOME /home/pbrian
-RUN mkdir $WKDIR
-
-
-### {{ apt }}
 
 # build the basic development world
 RUN apt-get update && \
@@ -29,11 +25,7 @@ RUN apt-get update && \
                        wget curl \
                        x11-apps \
                        firefox
-
-
-
-### {{ py3 }}
-
+		       
 ###### symlinking to have `pip` and `python`
 RUN cd /usr/bin \
        && ln -sf python3.6 python \
@@ -67,10 +59,6 @@ RUN set -ex; \
 	rm -f get-pip.py
 
 #####
-RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install pygithub
-RUN rm /usr/bin/python
-RUN ln -s /usr/bin/python3 /usr/bin/python
 
 ### update python pkgs
 # Install any needed packages (ie above those for the runtime)
@@ -78,26 +66,20 @@ RUN pip install --trusted-host pypi.python.org sphinx \
                                                pytest \
 					       pylint
 
+###
+# proc-gmail
 
-# Spacy
-RUN python -m spacy download en
+
+### Setup the developer env I want in Python
+#RUN cd $WKDIR
+RUN mkdir $WKDIR
 COPY rcassets/requirements.txt $WKDIR/
+RUN ls -lh
 RUN pip install -r $WKDIR/requirements.txt
-# seems ubunut installs pip_internal again mucking things up
+RUN pip install --upgrade google-api-python-client
 
 
-
-
-
-### {{ otherdevtools }}
-
-
-### Other Dev Tools
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
-RUN apt-get install -y nodejs
-
-
-### {{ sshX }}
+### end python
 
 ### Create SSH access to box
 ### NB Fix root access 
@@ -109,28 +91,20 @@ RUN sed -ri 's/^#AllowTcpForwarding\s+.*/AllowTcpForwarding yes/g' /etc/ssh/sshd
 RUN sed -ri 's/^#X11Forwarding\s+.*/X11Forwarding yes/g' /etc/ssh/sshd_config
 RUN sed -ri 's/^#X11UseLocalhost\s+.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
 
+### Other Dev Tools
+## Node and React
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+RUN apt-get install -y nodejs
 
 
+#################### Misc config ##########################
+## Locales
+# TBD
 
+## fonts
+RUN apt-get -y install fonts-inconsolata
 
-### {{ latex }}
-
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive && \
-    apt-get install -y texlive-base \
-                       texlive-latex-recommended \
-                       texlive-latex-extra \
-                       texlive-fonts-recommended \
-                       texlive-fonts-extra \
-                       texlive-latex-base \
-                       texlive-font-utils 
-
-
-
-### {{ user }}
-
-
-### Setup me as only user .... because I will be !
+### HOME 
 RUN apt-get install sudo
 RUN useradd -m -c 'Paul Brian' pbrian --shell /bin/bash 
 RUN usermod -aG sudo pbrian
@@ -149,31 +123,32 @@ COPY rcassets/ENTRYPOINT.sh $USERHOME
 COPY rcassets/ENTRYPOINT.sh $USERHOME
 RUN chmod 0777 $USERHOME/ENTRYPOINT.sh
 
-
-
-
-### {{ baseconfig }}
-
-#################### Misc config ##########################
-## Locales
-# TBD
-
-## fonts
-RUN apt-get -y install fonts-inconsolata
-
-
-
+# seems ubunut installs pip_internal again mucking things up
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install pygithub
+RUN rm /usr/bin/python
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 ENV TZ=Europe/London
 #not ideal
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -y tzdata
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive && \
+    apt-get install -y texlive-base \
+                       texlive-latex-recommended \
+                       texlive-latex-extra \
+                       texlive-fonts-recommended \
+                       texlive-fonts-extra \
+                       texlive-latex-base \
+                       texlive-font-utils 
+# Spacy
+RUN python -m spacy download en
 
+#TODO: debconf-set-selections for all debconf issues
 
-
+COPY rcassets/.emacs $USERHOME
 
 EXPOSE 22
 ENTRYPOINT ["/home/pbrian/ENTRYPOINT.sh"]
-
-

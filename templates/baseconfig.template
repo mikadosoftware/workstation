@@ -1,0 +1,15 @@
+#################### Misc config ##########################
+## Locales
+# TBD
+
+## fonts
+RUN apt-get -y install fonts-inconsolata
+
+
+
+
+ENV TZ=Europe/London
+#not ideal
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get install -y tzdata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone

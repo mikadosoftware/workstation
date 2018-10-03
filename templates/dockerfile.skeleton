@@ -1,0 +1,29 @@
+FROM ubuntu:18.04
+MAINTAINER pbrian
+LABEL Name="pbriandev" Version=0.0.1
+
+### Constants
+ENV WKDIR /staging
+ENV USERHOME /home/pbrian
+RUN mkdir $WKDIR
+
+{{ apt }}
+
+{{ py3 }}
+
+{{ otherdevtools }}
+
+{{ sshX }}
+
+{{ latex }}
+
+{{ user }}
+
+{{ baseconfig }}
+
+
+
+EXPOSE 22
+ENTRYPOINT ["/home/pbrian/ENTRYPOINT.sh"]
+
+
