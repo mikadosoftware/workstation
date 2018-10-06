@@ -7,6 +7,9 @@ ENV WKDIR /staging
 ENV USERHOME /home/pbrian
 RUN mkdir $WKDIR
 
+#Investigate this more
+ENV DEBIAN_FRONTEND=noninteractive
+
 
 ### {{ apt }}
 
@@ -34,37 +37,18 @@ RUN apt-get update && \
 
 ### {{ py3 }}
 
+###### Install with apt
+RUN apt-get install -y python3.6 \
+                       python3.6-dev \
+                       python3-distutils \
+                       python3-distlib \
+                       python3-pip
+
 ###### symlinking to have `pip` and `python`
 RUN cd /usr/bin \
        && ln -sf python3.6 python \
-       && ln -sf python3.6 python3
-
-############ Install pip (bootstrapping)
-# if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-# 18.04 does not have it but get-pip expects it
-RUN apt-get install -y python3-distutils python3-distlib 
-
-
-ENV PYTHON_PIP_VERSION 18.0
-RUN ls -l
-RUN set -ex; \
-	\
-	wget -O get-pip.py 'https://bootstrap.pypa.io/get-pip.py'; \
-	\
-	python get-pip.py \
-		--disable-pip-version-check \
-		--no-cache-dir \
-		"pip==$PYTHON_PIP_VERSION" \
-	; \
-	pip --version; \
-	\
-	find /usr/local -depth \
-		\( \
-			\( -type d -a \( -name test -o -name tests \) \) \
-			-o \
-			\( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
-		\) -exec rm -rf '{}' +; \
-	rm -f get-pip.py
+       && ln -sf python3.6 python3 \
+       && ln -sf pip3 pip
 
 #####
 RUN python3 -m pip install --upgrade pip
@@ -79,10 +63,12 @@ RUN pip install --trusted-host pypi.python.org sphinx \
 					       pylint
 
 
-# Spacy
-RUN python -m spacy download en
+# install requirements file. (why not specify in thisfile???)
 COPY rcassets/requirements.txt $WKDIR/
 RUN pip install -r $WKDIR/requirements.txt
+# Additonal setup for spacy.  I think this is sensible to do specify in this file them
+RUN python -m spacy download en
+
 # seems ubunut installs pip_internal again mucking things up
 
 
@@ -115,9 +101,7 @@ RUN sed -ri 's/^#X11UseLocalhost\s+.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
 
 ### {{ latex }}
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive && \
-    apt-get install -y texlive-base \
+RUN apt-get install -y texlive-base \
                        texlive-latex-recommended \
                        texlive-latex-extra \
                        texlive-fonts-recommended \
@@ -167,7 +151,7 @@ RUN apt-get -y install fonts-inconsolata
 ENV TZ=Europe/London
 #not ideal
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get install -y tzdata
+RUN DEBIAN_FRONTEND=noninteractive && apt-get install -y tzdata
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 

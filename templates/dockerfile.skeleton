@@ -7,6 +7,9 @@ ENV WKDIR /staging
 ENV USERHOME /home/pbrian
 RUN mkdir $WKDIR
 
+#Investigate this more
+ENV DEBIAN_FRONTEND=noninteractive
+
 {{ apt }}
 
 {{ py3 }}

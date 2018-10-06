@@ -1,6 +1,4 @@
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive && \
-    apt-get install -y texlive-base \
+RUN apt-get install -y texlive-base \
                        texlive-latex-recommended \
                        texlive-latex-extra \
                        texlive-fonts-recommended \

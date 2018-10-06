@@ -38,7 +38,6 @@ RUN apt-get install -y python3-distutils python3-distlib
 
 
 ENV PYTHON_PIP_VERSION 18.0
-RUN ls -l
 RUN set -ex; \
 	\
 	wget -O get-pip.py 'https://bootstrap.pypa.io/get-pip.py'; \
