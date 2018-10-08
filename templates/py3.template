@@ -14,8 +14,6 @@ RUN cd /usr/bin \
 #####
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install pygithub
-RUN rm /usr/bin/python
-RUN ln -s /usr/bin/python3 /usr/bin/python
 
 ### update python pkgs
 # Install any needed packages (ie above those for the runtime)
@@ -32,4 +30,6 @@ RUN python -m spacy download en
 
 # seems ubunut installs pip_internal again mucking things up
 
-
+# lastly redo symlinks
+RUN rm /usr/bin/python
+RUN ln -s /usr/bin/python3 /usr/bin/python

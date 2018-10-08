@@ -12,7 +12,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 {{ apt }}
 
-{{ py3 }}
+{{ baseconfig }}
 
 {{ otherdevtools }}
 
@@ -22,8 +22,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 {{ user }}
 
-{{ baseconfig }}
-
+{{ py3 }}
 
 
 EXPOSE 22
