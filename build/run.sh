@@ -5,6 +5,7 @@ sudo docker run -d \
  -v ~/projects:/var/projects \
  -v ~/secrets:/var/secrets:ro \
  --name run_wkstn \
+ --device /dev/snd \
  -p 2222:22 \
  workstation:latest
 

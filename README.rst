@@ -2,17 +2,21 @@
 Docker Workstation Anywhere
 ===========================
 
-The concept of an *immutable server* for prodiction deployment is now
+The concept of an *immutable server* for production deployment is now
 fully mainstream, but the same concepts underpinning servers is less
 applied to the workstations on which the developers work.
 
 We have a tendancy to start with a nice clean laptop, a Mac if we are
 lucky, and slowly but surely *stuff* creeps on, dependancies we did
-not know about appear and we stop trusting our main tool.
+not know about appear and we stop trusting the platform we stand on.
 
-So I have used Docker to make my own "immutable" workstation.  It is the same
+So I have used Docker to make my own *immutable workstation*.  It is the same
 stack running on my banged-about-on-commute laptop, my wife's nice big screen iMac
-and even on my client's Windows box, that I had to use for policy reasons.
+and even on my client's Windows box, that I had to use for client's policy reasons.
+
+I get the same development environment everywhere (well, depends on the client), and
+the ratchet effect of continuously improving security - I can always improve something 
+on the install, and re-use that install on the server side.
 
 I use X-Forwarding to run the same visual tools, configured the same way, on
 any box I am working on, and *anything* that changes I keep in source control

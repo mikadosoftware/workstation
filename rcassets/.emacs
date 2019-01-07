@@ -35,7 +35,7 @@
 (load-theme 'material t) ;; load material theme
 ;; fonts
 
-(set-face-attribute 'default nil :family "inconsolata" :height 180)
+(set-face-attribute 'default nil :family "inconsolata" :height 260)
 
 ;; dont use ReSt mode for sphinx
 (add-to-list 'auto-mode-alist '("\\.rst\\'" . text-mode))

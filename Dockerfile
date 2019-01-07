@@ -35,43 +35,23 @@ RUN apt-get update && \
 
 
 
-### {{ py3 }}
+### {{ baseconfig }}
 
-###### Install with apt
-RUN apt-get install -y python3.6 \
-                       python3.6-dev \
-                       python3-distutils \
-                       python3-distlib \
-                       python3-pip
+#################### Misc config ##########################
+## Locales
+# TBD
 
-###### symlinking to have `pip` and `python`
-RUN cd /usr/bin \
-       && ln -sf python3.6 python \
-       && ln -sf python3.6 python3 \
-       && ln -sf pip3 pip
-
-#####
-RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install pygithub
-RUN rm /usr/bin/python
-RUN ln -s /usr/bin/python3 /usr/bin/python
-
-### update python pkgs
-# Install any needed packages (ie above those for the runtime)
-RUN pip install --trusted-host pypi.python.org sphinx \
-                                               pytest \
-					       pylint
+## fonts
+RUN apt-get -y install fonts-inconsolata
 
 
-# install requirements file. (why not specify in thisfile???)
-COPY rcassets/requirements.txt $WKDIR/
-RUN pip install -r $WKDIR/requirements.txt
-# Additonal setup for spacy.  I think this is sensible to do specify in this file them
-RUN python -m spacy download en
-
-# seems ubunut installs pip_internal again mucking things up
 
 
+ENV TZ=Europe/London
+#not ideal
+ENV DEBIAN_FRONTEND=noninteractive
+RUN DEBIAN_FRONTEND=noninteractive && apt-get install -y tzdata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 
 
@@ -81,6 +61,9 @@ RUN python -m spacy download en
 ### Other Dev Tools
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 RUN apt-get install -y nodejs
+RUN npm install -g create-react-app
+RUN cd /var/projects/learnreact && create-react-app test1
+
 
 
 ### {{ sshX }}
@@ -136,24 +119,43 @@ RUN chmod 0777 $USERHOME/ENTRYPOINT.sh
 
 
 
-### {{ baseconfig }}
+### {{ py3 }}
 
-#################### Misc config ##########################
-## Locales
-# TBD
+###### Install with apt
+RUN apt-get install -y python3.6 \
+                       python3.6-dev \
+                       python3-distutils \
+                       python3-distlib \
+                       python3-pip
 
-## fonts
-RUN apt-get -y install fonts-inconsolata
+###### symlinking to have `pip` and `python`
+RUN cd /usr/bin \
+       && ln -sf python3.6 python \
+       && ln -sf python3.6 python3 \
+       && ln -sf pip3 pip
+
+#####
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install pygithub
+
+### update python pkgs
+# Install any needed packages (ie above those for the runtime)
+RUN pip install --trusted-host pypi.python.org sphinx \
+                                               pytest \
+					       pylint
 
 
+# install requirements file. (why not specify in thisfile???)
+COPY rcassets/requirements.txt $WKDIR/
+RUN pip install -r $WKDIR/requirements.txt
+# Additonal setup for spacy.  I think this is sensible to do specify in this file them
+RUN python -m spacy download en
 
+# seems ubunut installs pip_internal again mucking things up
 
-ENV TZ=Europe/London
-#not ideal
-ENV DEBIAN_FRONTEND=noninteractive
-RUN DEBIAN_FRONTEND=noninteractive && apt-get install -y tzdata
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
+# lastly redo symlinks
+RUN rm /usr/bin/python
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 
 
