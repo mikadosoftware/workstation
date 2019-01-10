@@ -10,7 +10,7 @@ cffi==1.11.4
 chardet==3.0.4
 CommonMark==0.5.4
 coverage==4.5.1
-cryptography==2.1.4
+cryptography==2.3
 docopt==0.6.2
 docutils==0.12
 ecdsa==0.13
@@ -27,7 +27,7 @@ mccabe==0.6.1
 MiniMock==1.2.8
 #mkrepo==0.0.0
 more-itertools==4.1.0
-paramiko==1.17.6
+paramiko==2.0.9
 pluggy==0.6.0
 purepng==0.2.0
 py==1.5.3
@@ -42,7 +42,7 @@ python-dateutil==2.6.1
 pytz==2016.7
 q==2.6
 recommonmark==0.4.0
-requests==2.18.4
+requests==2.20.0
 rinoh-typeface-dejavuserif==0.1.1
 rinoh-typeface-texgyrecursor==0.1.1
 rinoh-typeface-texgyreheros==0.1.1
@@ -55,7 +55,7 @@ snowballstemmer==1.2.1
 Sphinx==1.4.8
 #todoinator==0.0.0
 tox==3.0.0
-urllib3==1.22
+urllib3==1.23
 virtualenv==15.2.0
 #Weaver==0.0.1
 wrapt==1.10.11
