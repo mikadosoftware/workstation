@@ -1,6 +1,6 @@
-===========================
-Docker Workstation Anywhere
-===========================
+============================
+Docker Immutable Workstation 
+============================
 
 The concept of an *immutable server* for production deployment is now
 fully mainstream, but the same concepts underpinning servers is less
