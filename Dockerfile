@@ -62,7 +62,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 RUN apt-get install -y nodejs
 RUN npm install -g create-react-app
-RUN cd /var/projects/learnreact && create-react-app test1
+#RUN cd /var/projects/learnreact && create-react-app test1
 
 
 
@@ -83,7 +83,7 @@ RUN sed -ri 's/^#X11UseLocalhost\s+.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
 
 
 ### {{ latex }}
-
+RUN apt-get update 
 RUN apt-get install -y texlive-base \
                        texlive-latex-recommended \
                        texlive-latex-extra \

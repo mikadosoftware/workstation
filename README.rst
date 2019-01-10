@@ -10,31 +10,27 @@ We have a tendancy to start with a nice clean laptop, a Mac if we are
 lucky, and slowly but surely *stuff* creeps on, dependancies we did
 not know about appear and we stop trusting the platform we stand on.
 
-So I have used Docker to make my own *immutable workstation*.  It is the same
-stack running on my banged-about-on-commute laptop, my wife's nice big screen iMac
-and even on my client's Windows box, that I had to use for client's policy reasons.
+So I have used Docker to make my own *immutable workstation*.  It
+means that I get *exactly* the same stack running on my
+banged-about-on-commute laptop, my wife's nice big screen iMac and
+even on my client's Windows box, that I had to use for client's policy
+reasons.  So wherever I was, I was using the same config of emacs -
+using it on a windows machine or a mac or a linux host, it was the
+same emacs, and the same nice set of tools like grep.  And it was
+running XWindows in those places too.
 
-I get the same development environment everywhere (well, depends on the client), and
-the ratchet effect of continuously improving security - I can always improve something 
-on the install, and re-use that install on the server side.
+Secondly, I get the ratchet effect of continuously improving security
+- I can always improve something on the install, and just rerun
+`docker build` and I have permanently remebered to fix that security
+hole wherever I build my workstation.
 
-I use X-Forwarding to run the same visual tools, configured the same way, on
-any box I am working on, and *anything* that changes I keep in source control
-(or on a secure key).
+I use X-Forwarding to run the same visual tools, configured the same
+way, on any box I am working on, and *anything* that changes I keep in
+source control (here in this repo) and my secrets are all stored on a USB key that I carry with me and plugin to the host - so my github ssh key is on a USB stick, that when I plug it in, .
+    
 
-This workstation has a few rules
-
-* The build is automated - no manual steps involved.
-* I have to be able to precisely define what is on there and how it is configured.
-* I have to be able to re-create it exactly
-* If I restart, all state is reset (this is not as crazy as it sounds)
-* It needs to be secure
-
-
-
-
-The bare bones
-==============
+Using X Windows
+===============
 
 The *essential* parts of this approach are hard to dig out from Google
 searches, but I hope this makes them clearer - the below code will
@@ -84,6 +80,44 @@ on the container, and it will appear on the laptop we are running on.
 
 #TODO: screenshot 
 
+Using Sound
+===========
+
+There is a developer who (I think) works for Docker and has a list of YouTube
+videos showing how to do things like run Skype on Docker.  She developed a
+`snd` device parameter for `docker run`, which seems to work fine. I don't do
+much with it but should expand on it.  
+
+Using Secrets
+=============
+
+
+/etc/fstab on host machine::
+
+
+    # /etc/fstab: static file system information.
+    ....
+    UUID=ed74f120-1736-4f59-8752-06098a635c16 /home/pbrian/secrets/usb   ext4  user,rw,auto,nofail  0   0	
+    ...
+
+    I used `sudo blkid` to get the UUID for that specific USB key.
+    
+    It is then automounted to my home dir, where docker will make it
+    visible in the docker instance, and I get to use the ssh keys on
+    the USB stick to authenticate to, for example, github.
+
+Using Dropbox
+=============
+
+I have some files I keep on private github repos, but for most documents
+(things like Bank statements) it seems easier to just store them on Dropbox.
+I merely have my Dropbox folder on my home dir, and mount it into Docker.
+It seems to work with no horrible clashes so I will keep it. At somepoint it
+seems sensible to migrate to having the Dropbox client actually running on
+the docker instance.
+
+Its not terribly secure, but it seems good enough.
+
 Why is this good?
 -----------------
 
@@ -105,6 +139,12 @@ Also, I can easily reuild it
 Also I can spin up a microservice on laptop that also points at the
 same volume, and it will thus be using the code I just developed
 
-This works even if I change underlying OS - which is good for wandering
-contractors like me.
+This works even if I change underlying OS - which is good for
+wandering contractors like me.
+
+TODO::
+
+  #TODO:: allow two workstations on same host, so I can play / verify changes
+  #TODO:: get dropbox installed on docker instance
+
 

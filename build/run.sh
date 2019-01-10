@@ -4,6 +4,7 @@ sudo docker run -d \
  -v ~/data:/var/data \
  -v ~/projects:/var/projects \
  -v ~/secrets:/var/secrets:ro \
+ -v ~/Dropbox:/var/Dropbox \
  --name run_wkstn \
  --device /dev/snd \
  -p 2222:22 \
