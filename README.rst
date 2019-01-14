@@ -6,8 +6,8 @@ The concept of an *immutable server* for production deployment is now
 fully mainstream, but the same concepts underpinning servers is less
 applied to the workstations on which the developers work.
 
-We have a tendancy to start with a nice clean laptop, a Mac if we are
-lucky, and slowly but surely *stuff* creeps on, dependancies we did
+We have a tendency to start with a nice clean laptop, a Mac if we are
+lucky, and slowly but surely *stuff* creeps on, dependencies we did
 not know about appear and we stop trusting the platform we stand on.
 
 So I have used Docker to make my own *immutable workstation*.  It
@@ -15,18 +15,18 @@ means that I get *exactly* the same stack running on my
 banged-about-on-commute laptop, my wife's nice big screen iMac and
 even on my client's Windows box, that I had to use for client's policy
 reasons.  So wherever I was, I was using the same config of emacs -
-using it on a windows machine or a mac or a linux host, it was the
+using it on a windows machine or a mac or a Linux host, it was the
 same emacs, and the same nice set of tools like grep.  And it was
 running XWindows in those places too.
 
 Secondly, I get the ratchet effect of continuously improving security
 - I can always improve something on the install, and just rerun
-`docker build` and I have permanently remebered to fix that security
+`docker build` and I have permanently remembered to fix that security
 hole wherever I build my workstation.
 
 I use X-Forwarding to run the same visual tools, configured the same
 way, on any box I am working on, and *anything* that changes I keep in
-source control (here in this repo) and my secrets are all stored on a USB key that I carry with me and plugin to the host - so my github ssh key is on a USB stick, that when I plug it in, .
+source control (here in this repo) and my secrets are all stored on a USB key that I carry with me and plugin to the host - so my GitHub ssh key is on a USB stick, that when I plug it in, .
     
 
 Using X Windows
@@ -109,10 +109,10 @@ Using Secrets
 Using Dropbox
 =============
 
-I have some files I keep on private github repos, but for most documents
+I have some files I keep on private GitHub repos, but for most documents
 (things like Bank statements) it seems easier to just store them on Dropbox.
 I merely have my Dropbox folder on my home dir, and mount it into Docker.
-It seems to work with no horrible clashes so I will keep it. At somepoint it
+It seems to work with no horrible clashes so I will keep it. At some point it
 seems sensible to migrate to having the Dropbox client actually running on
 the docker instance.
 
@@ -122,19 +122,19 @@ Why is this good?
 -----------------
 
 Quite simply, I can easily control the dev environment, rebuild it at
-will, and run programs "on my latop" when they are not installed or
+will, and run programs "on my laptop" when they are not installed or
 configured on the laptop.
 
 In fact I think the best part of this is configuration for my *whole*
-dev machine is sgtored on github, and can be re-created anywhere
+dev machine is stored on GitHub, and can be re-created anywhere
 easily.
 
-With the volume mounted, I can then use emacs / konsole running inside
+With the volume mounted, I can then use emacs / console running inside
 a container, and adjust files that are stored on my local laptop.
 
-I then have a consistent dev environemnt 
+I then have a consistent dev environment 
 
-Also, I can easily reuild it
+Also, I can easily rebuild it
 
 Also I can spin up a microservice on laptop that also points at the
 same volume, and it will thus be using the code I just developed
