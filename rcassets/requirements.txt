@@ -62,3 +62,4 @@ wrapt==1.10.11
 oauth2client
 spacy
 google-api-python-client
+pyyaml
