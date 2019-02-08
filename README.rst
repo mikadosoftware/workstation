@@ -1,6 +1,6 @@
-===========================
-Docker Workstation Anywhere
-===========================
+============================
+Docker Immutable Workstation 
+============================
 
 The concept of an *immutable server* for production deployment is now
 fully mainstream, but the same concepts underpinning servers is less
@@ -147,4 +147,7 @@ TODO::
   #TODO:: allow two workstations on same host, so I can play / verify changes
   #TODO:: get dropbox installed on docker instance
 
+
+Roadmap
+See `Roadmap <docs/roadmap.rst>`_
 
