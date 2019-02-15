@@ -21,4 +21,15 @@ Milestones
 * look at recipes / methods to build the final Dockerfile and make it more robust without losing the basic "it's just string formatting" part
 
 * Marketing 
-  well this was supposed to be just a personal project, and I don't see it as being the next big thing.  But enough people have noticed that it should be polished and given a run round the block.  Once it's stops being fun I will stop :-) 
+  well this was supposed to be just a personal project, and I don't see it as being the next big thing.  But enough people have noticed that it should be polished and given a run round the block.  Once it's stops being fun I will stop :-)
+
+It also seems a good idea to use it for the "plumbing" portion of my new book - that is the dev and CI cycle
+I should have this as an exemplar dev / CI cycle - so 
+
+* pre-commit hooks ensuring, lint, test, formatting, doc
+* Jenkins build on AWS leading to CI, docker deployment (err how??)
+* docs build
+
+SImilar cases can be made for rewriting the CMS, and adding FIDO to the CMS
+
+
