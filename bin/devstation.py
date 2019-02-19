@@ -5,11 +5,94 @@
 DevStation
 ==========
 
-Headlines
+This is a single entry point for the `devstation` project.
 
-* we create a config / build directory under ~/.devstation
-* we read config from there
-* we write the prepared DockerFIles to there
+The project is pretty simple - I want to have a consistent, 
+immutable workstation on any host machine I am developing on
+- so I am using a docker instance on a host machine - the instance
+is my development "machine", and it can be rebuilt from consistent
+templates - this script helps control 
+
+* the start and stopping of the dev instance.
+* the compilation of the docker image 
+* vsarious config and templates used to build to docker image.
+
+This script does quite a lot, and needs to be installed on 
+the host machine - do so using
+
+   pip3 install docopt
+   python3 setup.py install
+   (I will launch it on PyPI soon)
+
+Once this is done, you should be able to run 
+
+  devstation.py
+
+And see the help options::
+
+    Usage:
+        devstation.py config 
+        devstation.py start (latest | next) 
+        devstation.py login (latest | next)
+        devstation.py rebuild (latest | next)
+        devstation.py status 
+        devstation.py makeDockerfile 
+        devstation.py runtests
+        devstation.py quickstart
+        devstation.py (-h | --help )
+
+    Options:
+        -h --help    Show this screen
+
+
+Configuration
+-------------
+
+A helper script to build config will be needed shortly.
+TODO: build clean docker for testing script install on
+
+Config file is located as `~/.devstation/config.ini`
+It has following format and items ::
+
+    [default]
+    tagname   = workstation
+    instance_name = devstation
+    localhost  = 127.0.0.1
+    username   = pbrian
+    ssh_port   = 2222
+    devstation_config_root = ~/.devstation
+    terminal_command = /usr/bin/konsole -e
+    volumes = {"~/data":     "/var/data",
+               "~/projects": "/var/projects",
+               "~/secrets":  "/var/secrets:ro",
+               "~/Dropbox":  "/var/Dropbox"
+               }
+
+
+
+`volumes` is a json-formatted string that will be converted during config
+reading.
+`tagname` is the tagname used to identify the docker *instance*
+`image_name` is the name used to identify the built docker image, from
+    which we will run an instance.  You must build a docker instance.
+`localhost` is obvious, probably needs to be removed
+`username` is the name of the (only?) user who will use the docker instace.
+`ssh_port` port for docker instance to listen on for ssh connections 
+   from the host machine (how we talk to our dev machine)
+`devstation_config_root` the location of the config file, plus other templates
+`terminal_command` - command to run before sshing to the running docker instance
+
+
+Preparing a dockerfile
+----------------------
+TBD
+
+Getting started
+---------------
+
+1. Set up config - see above
+2. Make a docker file
+3. Build a Docker image
 
 
 
@@ -47,43 +130,6 @@ Using latest and next
 pip install black as an example
 
 
-# commands
-
-
-### rebuild 
-# docker build --tag <tagname>
-# We want to be able to have multiple tagged workstations, and use a specific one
-# mostly we should use one as a default, and a second as a tryout version for upgrades and
-# changes
-# As such we need a config file for 
-
-### rebuild *does* require python 3, and docopt.  So its
-# homebrew for apple - thats ok
-# pip install for rest of the world
-
-login/again
-ssh -X pbrian@127.0.0.1 -p 2222
-
-startdev
-sudo docker kill run_wkstn
-cd projects/workstation
-sudo sh build/run.sh
-sleep 10
-sh build/login.sh
-
-run
-
-sudo docker container prune -f
-sudo docker run -d \
- -v ~/data:/var/data \
- -v ~/projects:/var/projects \
- -v ~/secrets:/var/secrets:ro \
- -v ~/Dropbox:/var/Dropbox \
- --name run_wkstn \
- --device /dev/snd \
- -p 2222:22 \
- workstation:latest
-
 """
 ##### imports ##### 
 import logging, sys
@@ -92,16 +138,18 @@ import subprocess
 import time
 import os
 import json
-
+from pprint import pprint as pp
 from mikadolib.common import config
 
 ##### Module setup #####
 # TODO: split out logging into common module
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.DEBUG)
+handler.setLevel(logging.INFO)
 log.addHandler(handler)
+
+DRYRUN=False
 
 #: usage defintons
 DOCOPT_HELP = """devstation 
@@ -112,8 +160,10 @@ Usage:
     devstation.py login (latest | next)
     devstation.py rebuild (latest | next)
     devstation.py status 
-    devstation.py makeDockerfile 
+    devstation.py makeDockerfile (latest | next)
     devstation.py runtests
+    devstation.py emit
+    devstation.py quickstart
     devstation.py (-h | --help )
 
 Options:
@@ -129,17 +179,20 @@ CONFIGLOCATION = os.path.join(os.path.expanduser('~'),
                               '.devstation/config.ini')
 
 #: pull out into a dedicated config file??
-CONFD = config.read_ini(CONFIGLOCATION)['default']
-### This is ... fragile
-### we are extracting json string from config and parsing here...
-unparsedjsonstring = CONFD['volumes']
-d = json.loads(unparsedjsonstring)
-CONFD['volumes'] = d
-for k,i in CONFD.items():
-    if "~/" in i:
-        CONFD[k] = os.path.join(os.path.expanduser('~'),
-                                CONFD[k].replace("~/",""))
-
+try:
+    CONFD = config.read_ini(CONFIGLOCATION)['default']
+    ### This is ... fragile
+    ### we are extracting json string from config and parsing here...
+    unparsedjsonstring = CONFD['volumes']
+    d = json.loads(unparsedjsonstring)
+    CONFD['volumes'] = d
+    for k,i in CONFD.items():
+        if "~/" in i:
+            CONFD[k] = os.path.join(os.path.expanduser('~'),
+                                    CONFD[k].replace("~/",""))
+except:
+    CONFD={}
+    
 def build_sshcmd():
     """ """
     return 'ssh -X {username}@{localhost} -p {ssh_port}'.format(**CONFD)
@@ -174,16 +227,29 @@ def build_dockerrun(latest=True):
 def build_docker_build(latest=True):
     """Return command to (re)build the container.
 
+    We store the Dockerfile (as that name)
+    in dir .next or .latest so that we can 
+    have various templates and assets and so on
+    in the 'context' directory.
+
     """
-    tmpl = 'sudo docker build -t {tagname}:{tagtag} -f {pathtodockerfile}'
+    tmpl = 'sudo docker build -t {tagname}:{tagtag} {pathtodockerfile}'
     _latest = LATEST if latest else NEXT
-    pathtodockerfile = os.path.join(CONFD['devstation_config_root'], 'Dockerfile'+'.'+_latest)
+    pathtodockerfile = os.path.join(CONFD['devstation_config_root'],
+                                    '.'+_latest)
     return tmpl.format(tagname=CONFD['tagname'],
                        tagtag=_latest,
                        pathtodockerfile=pathtodockerfile
                        )
-    
 
+def run_subprocess(cmd):
+    """ """
+    if DRYRUN:
+        print(cmd)
+    else:
+        subprocess.run(cmd,
+                   shell=True)
+       
 def spawn_sibling_console():
     """This script is best thought of as a launcher for other shells we
     shall be working in.  We want to interact with the console, not
@@ -198,8 +264,9 @@ def spawn_sibling_console():
 
     sshcmd = '{} {} &'.format(CONFD['terminal_command'],
                               build_sshcmd())
-    subprocess.run(sshcmd,
-                   shell=True)
+    log.debug(sshcmd)
+    run_subprocess(sshcmd)
+                  
         
 def show_config(confd=None):
     """Display the current config settings
@@ -220,7 +287,7 @@ def show_config(confd=None):
 def handle_start(args):
     log.debug("`start` command passed with args %s", args)
     #do start up here
-    cmds = build_dockerrun()
+    cmds = build_dockerrun(args['latest'])
     for cmd in cmds:
         print(cmd)
         time.sleep(10) # brute force give docker time to complete its stuff. 
@@ -240,14 +307,29 @@ def handle_login(args):
     
 def handle_rebuild(args):
     log.debug("`rebuild` command passed with args %s", args)
-    print(build_docker_build(latest=args['latest']))
+    cmd = build_docker_build(latest=args['latest'])
+    print(cmd)
+    run_subprocess(cmd)
     
 def handle_status(args):
-    log.debug("`status` command passed with args %s", args)
+    log.info("`status` command passed with args %s", args)
     print("To Be Done")
 
+def hasValidConfig():
+    """This is a placeholder for future development on checking curr env. """
+    has_config_file = os.path.isfile(CONFIGLOCATION)
+    return all([has_config_file,])
+    
+    
+def handle_quickstart(args):
+    """ """
+    print("We shall walk you thorugh a series of questions to setup devstation")
+    if not hasValidConfig():
+        print("we now need to create the config")
+    
+    
 def handle_tests(args):
-    from pprint import pprint as pp
+
     print("\n### Quick Testing - args\n")
     pp(args)
     print("\n### Output of build_dockerrun()\n")
@@ -259,20 +341,37 @@ def handle_tests(args):
     show_config()
 
     #runtests()
+
+def handle_emit(args):
+    latest=args['latest']
+    cmds = build_dockerrun(latest)
+    with open("run.sh", "w") as fo:
+        fo.write("\n### Output of build_docker_run\n")
+        fo.write("\n".join(cmds))
+    
+        
+    pp(build_docker_build(latest))
+    print("\n### Output of build_sshcmd()\n")
+    pp(build_sshcmd())
+      
     
 def handle_unknown():
     print("Unknown request please type `devstation --help`")
 
-def handle_makeDockerfile():
-    makeDocker(latest=True)
+def handle_makeDockerfile(args):
+    makeDocker(latest=args['latest'])
+
     
 def makeDocker(latest=True):
-    """Take a .skeleton file, and replace defined markup with contents of txt files
+    """Take a .skeleton file, and replace defined markup with 
+       contents of txt files
 
     Based on 'dockerfile.skeleton', replace any instance of 
     {{ python }} with the contents of file `templates\python.template`
     
-    This is an *extremely* simple templating tool."""
+    This is an *extremely* simple templating tool.  It is *not*
+    supposed to have the complexity even of Jinja2.  Its supposed to 
+    be really dumb."""
 
     _latest = LATEST if latest else NEXT
     folder = os.path.join(CONFD['devstation_config_root'],
@@ -310,7 +409,11 @@ def run(args):
     elif args['runtests']:
         handle_tests(args)
     elif args['makeDockerfile']:
-        handle_makeDockerfile()
+        handle_makeDockerfile(args)
+    elif args['emit']:
+        handle_emit(args)
+    elif args['quickstart']:
+        handle_quickstart(args)
     else:
         handle_unknown()
         
