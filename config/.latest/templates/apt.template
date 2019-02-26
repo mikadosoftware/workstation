@@ -1,0 +1,19 @@
+# build the basic development world
+RUN apt-get update && \
+    apt-get install -y apt-transport-https \
+                       build-essential \
+                       build-essential \
+                       dbus-x11 \
+                       dos2unix \
+                       emacs25 \
+                       fonts-inconsolata \
+                       git \
+                       konsole \
+                       libpython3.6-dev \
+                       openssh-server \
+                       python3.6 \
+                       python3.6-dev \
+                       software-properties-common \
+                       wget curl \
+                       x11-apps \
+                       firefox

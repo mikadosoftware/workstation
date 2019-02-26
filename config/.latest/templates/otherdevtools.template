@@ -1,0 +1,7 @@
+
+### Other Dev Tools
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+RUN apt-get install -y nodejs
+RUN npm install -g create-react-app
+# this has to be done when instance is running ...
+# RUN cd /var/projects/learnreact && create-react-app test1
