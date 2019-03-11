@@ -1,14 +1,14 @@
 ###### Install with apt
-RUN apt-get install -y python3.6 \
-                       python3.6-dev \
+RUN apt-get install -y python3.7 \
+                       python3.7-dev \
                        python3-distutils \
                        python3-distlib \
                        python3-pip
 
 ###### symlinking to have `pip` and `python`
 RUN cd /usr/bin \
-       && ln -sf python3.6 python \
-       && ln -sf python3.6 python3 \
+       && ln -sf python3.7 python \
+       && ln -sf python3.7 python3 \
        && ln -sf pip3 pip
 
 #####

@@ -1,9 +1,5 @@
-##!/usr/bin/python3
+#!/usr/bin/python3
 #! -*- coding:utf-8 -*-
-
-# [ ] ensure rebuild works ok
-# [ ] package config with this?
-
 
 """
 DevStation
@@ -139,6 +135,20 @@ Its that simple. We can play around with variables if we really need to.
 
 Using latest and next
 pip install black as an example
+
+[ ] put blog.mikadosoftware onto AWS and run this testing with docker on it.
+[ ] migrate rest of the articles there.
+
+[ ] create a plain docker instance and just import devstation, see if it works (ie clean install)
+
+
+
+[ ] run todoinator over this and all my projects
+[ ] run the get github projects into one place 
+[ ] this is looking like a personal workstation setup thingy - immutable workstation, todos, gitgetter
+[ ] launch tester docker with access to this projects so can pip -e, then 
+    ensure it can build locally the config etc correctly.
+
 
 
 """
@@ -301,11 +311,11 @@ def handle_start(args):
     # do start up here
     cmds = build_dockerrun(args["latest"])
     for cmd in cmds:
-        print(cmd)
-        time.sleep(10)  # brute force give docker time to complete its stuff.
         # TODO get better solution
+        print(cmd)
         subprocess.run(cmd, shell=True)
-    time.sleep(10)  # As above
+        time.sleep(2)  # brute force give docker time to complete its stuff.
+    time.sleep(10)  # As above, but let docker catch up before login
     handle_login(args)
 
 
@@ -374,7 +384,7 @@ def handle_unknown():
 def handle_makeDockerfile(args):
     makeDocker(latest=args["latest"])
 
-
+    
 def makeDocker(latest=True):
     """Take a .skeleton file, and replace defined markup with 
        contents of txt files
@@ -389,18 +399,17 @@ def makeDocker(latest=True):
 
     """
 
-    _latest = LATEST if latest else NEXT
-    folder = os.path.join(CONFD["devstation_config_root"], ".build", "templates")
+    _latest = "."+LATEST if latest else "."+NEXT
+    current_folder = os.path.join(CONFD["devstation_config_root"], _latest)
+    templates_folder = os.path.join(current_folder, 'templates') 
+    pathtodockerfile = os.path.join(current_folder, 'Dockerfile')
     skeleton = "dockerfile.skeleton"
-    pathtodockerfile = os.path.join(
-        CONFD["devstation_config_root"], ".build", "Dockerfile" + "." + _latest
-    )
     outputs = ""
-    with open(os.path.join(folder, skeleton)) as fo:
+    with open(os.path.join(templates_folder, skeleton)) as fo:
         for line in fo:
             if line.find("{{") == 0:
                 file = line.replace("{{", "").replace("}}", "").strip()
-                filepath = os.path.join(folder, file + ".template")
+                filepath = os.path.join(templates_folder, file + ".template")
                 txt = open(filepath).read()
                 outputs += "\n### {}\n{}\n".format(line, txt)
             else:
