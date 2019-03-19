@@ -7,11 +7,12 @@ DevStation
 
 This is a single entry point for the `devstation` project.
 
-The project is pretty simple - I want to have a consistent, 
-immutable workstation on any host machine I am developing on
-- so I am using a docker instance on a host machine - the instance
-is my development "machine", and it can be rebuilt from consistent
-templates - this script helps control 
+The project is pretty simple - I want to have a consistent, immutable
+workstation on any host machine I am developing on - so I am using a
+docker instance on a host machine - the instance is my development
+"machine", and it can be rebuilt from consistent templates - this
+script helps control all that - its supposed to be easier to get
+started than a bunch of poorly documneted shell scripts.
 
 * the start and stopping of the dev instance.
 * the compilation of the docker image 
@@ -26,7 +27,7 @@ the host machine - do so using
 
 Once this is done, you should be able to run 
 
-  devstation.py
+  ./devstation.py
 
 And see the help options::
 
@@ -47,6 +48,10 @@ And see the help options::
 
 Configuration
 -------------
+
+Initially `devstation.py` can run without a config folder,
+but pretty much the only thing you can do is `quickstart` which 
+will help setup a local config folder.
 
 we have a ~\.devstation\ folder in homedir
 This has
@@ -149,8 +154,6 @@ pip install black as an example
 [ ] launch tester docker with access to this projects so can pip -e, then 
     ensure it can build locally the config etc correctly.
 
-
-
 """
 ##### imports #####
 import logging, sys
@@ -192,10 +195,18 @@ Options:
 
 """
 
+DOCOPT_HELP_SHORT = '''We cannot detect a conifg folder at ~/.devstation - quickstart to create
+
+Usage:
+    devstation.py quickstart 
+
+ '''
+
 ############### Config
 LATEST = "latest"
 NEXT = "next"
 # This is a 'well-known' location
+CONFIGDIR      = os.path.join(os.path.expanduser("~"), ".devstation")
 CONFIGLOCATION = os.path.join(os.path.expanduser("~"), ".devstation/config.ini")
 
 #: pull out into a dedicated config file??
@@ -209,9 +220,10 @@ try:
     for k, i in CONFD.items():
         if "~/" in i:
             CONFD[k] = os.path.join(os.path.expanduser("~"), CONFD[k].replace("~/", ""))
+    HASCONFIGDIR=True
 except:
     CONFD = {}
-
+    HASCONFIGDIR=False
 
 def build_sshcmd():
     """ """
@@ -342,13 +354,19 @@ def hasValidConfig():
     has_config_file = os.path.isfile(CONFIGLOCATION)
     return all([has_config_file])
 
-
+import shutil
 def handle_quickstart(args):
     """ """
     print("We shall walk you thorugh a series of questions to setup devstation")
     if not hasValidConfig():
         print("we now need to create the config")
+        try:
+            #os.makedirs(CONFIGDIR)
+            shutil.copytree('/usr/local/config/', CONFIGDIR)
+        except Exception as e:
+            print(e)
 
+        
 
 def handle_tests(args):
 
@@ -394,7 +412,7 @@ def makeDocker(latest=True):
     
     This is an *extremely* simple templating tool.  It is *not*
     supposed to have the complexity even of Jinja2.  Its supposed to 
-    be really dumb.
+    be really dumb.  Lucky I wrote it then :-).
 
 
     """
@@ -421,7 +439,11 @@ def makeDocker(latest=True):
 
 def run(args):
 
-    if args["config"]:
+    #: start with quickstart as it may be our only options
+    #: [ ] make this safer with .get 
+    if args["quickstart"]:
+        handle_quickstart(args)
+    elif args["config"]:
         handle_config(args)
     elif args["start"]:
         handle_start(args)
@@ -437,20 +459,22 @@ def run(args):
         handle_makeDockerfile(args)
     elif args["emit"]:
         handle_emit(args)
-    elif args["quickstart"]:
-        handle_quickstart(args)
     else:
         handle_unknown()
 
 
 def runtests():
     import doctest
-
     doctest.testmod()
 
 
 def main():
-    args = docopt(DOCOPT_HELP)
+    
+    ## if we have not quickstart'd the config dir, only show quickstart option.
+    if HASCONFIGDIR:
+        args = docopt(DOCOPT_HELP)
+    else:
+        args = docopt(DOCOPT_HELP_SHORT)
     run(args)
 
 
