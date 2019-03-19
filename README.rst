@@ -148,6 +148,10 @@ TODO::
   #TODO:: get dropbox installed on docker instance
 
 
+Building on Mac OS
+------------------
+You will need a XServer running on the Mac.  I recommend using XQuartz - this will need to be installed and running before starting the ssh -X process so the ssh session can connect to something 
+
 Roadmap
 See `Roadmap <docs/roadmap.rst>`_
 
