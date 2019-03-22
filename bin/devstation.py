@@ -210,21 +210,26 @@ CONFIGDIR      = os.path.join(os.path.expanduser("~"), ".devstation")
 CONFIGLOCATION = os.path.join(os.path.expanduser("~"), ".devstation/config.ini")
 
 #: pull out into a dedicated config file??
-try:
-    CONFD = config.read_ini(CONFIGLOCATION)["default"]
-    ### This is ... fragile
-    ### we are extracting json string from config and parsing here...
-    unparsedjsonstring = CONFD["volumes"]
-    d = json.loads(unparsedjsonstring)
-    CONFD["volumes"] = d
-    for k, i in CONFD.items():
-        if "~/" in i:
-            CONFD[k] = os.path.join(os.path.expanduser("~"), CONFD[k].replace("~/", ""))
-    HASCONFIGDIR=True
-except:
-    CONFD = {}
-    HASCONFIGDIR=False
+def read_disk_config():
+    try:
+        confd = config.read_ini(CONFIGLOCATION)["default"]
+        ### This is ... fragile
+        ### we are extracting json string from config and parsing here...
+        unparsedjsonstring = confd["volumes"]
+        d = json.loads(unparsedjsonstring)
+        confd["volumes"] = d
+        for k, i in confd.items():
+            if "~/" in i:
+                confd[k] = os.path.join(os.path.expanduser("~"), confd[k].replace("~/", ""))
+                hasconfigdir=True
+    except:
+        confd = {}
+        hasconfigdir=False
+    return confd, hasconfigdir
 
+CONFD, HASCONFIGDIR = read_disk_config()
+print(read_disk_config())
+print("JFJFKJ")
 def build_sshcmd():
     """ """
     return "ssh -X {username}@{localhost} -p {ssh_port}".format(**CONFD)
@@ -355,18 +360,35 @@ def hasValidConfig():
     return all([has_config_file])
 
 import shutil
+def gatherinfo():
+    questions = {'username': 'What is username to use?',
+                 'Dropboxlocation': 'path to your Dropboxroot '
+                }
+    answers = {}
+    for label, question in questions.items():
+        answer = input(question)
+        answers[label] = answer
+    return answers
+
 def handle_quickstart(args):
     """ """
-    print("We shall walk you thorugh a series of questions to setup devstation")
+    helpmsg = ''
+    if hasValidConfig():
+        helpmsg += """You appear to have an existing config in {}.  
+                      Please adjust it manually - view docs for help.""".format(CONFIGLOCATION)
     if not hasValidConfig():
-        print("we now need to create the config")
+        helpmsg += "We shall walk you thorugh a series of questions"
+         
+        answersd = gatherinfo()
+        print(answersd)
+        
         try:
-            #os.makedirs(CONFIGDIR)
             shutil.copytree('/usr/local/config/', CONFIGDIR)
         except Exception as e:
             print(e)
 
-        
+        #now lets update the config file
+        confd = read_disk_config()
 
 def handle_tests(args):
 
@@ -435,7 +457,10 @@ def makeDocker(latest=True):
     fo = open(pathtodockerfile, "w")
     fo.write(outputs)
     fo.close()
-
+    telluser("Written new Dockerfile at {}".format(filepath))
+    
+def telluser(msg):
+    print(msg)
 
 def run(args):
 
