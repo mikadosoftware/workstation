@@ -163,7 +163,7 @@ import time
 import os
 import json
 from pprint import pprint as pp
-from mikadolib.common import config
+from mikado.core import config
 
 ##### Module setup #####
 # TODO: split out logging into common module
@@ -227,9 +227,13 @@ def read_disk_config():
         hasconfigdir=False
     return confd, hasconfigdir
 
+def write_disk_config(confd):
+    """ """
+    config.write_ini(confd, CONFIGLOCATION)
+    
+
 CONFD, HASCONFIGDIR = read_disk_config()
-print(read_disk_config())
-print("JFJFKJ")
+
 def build_sshcmd():
     """ """
     return "ssh -X {username}@{localhost} -p {ssh_port}".format(**CONFD)
@@ -362,7 +366,6 @@ def hasValidConfig():
 import shutil
 def gatherinfo():
     questions = {'username': 'What is username to use?',
-                 'Dropboxlocation': 'path to your Dropboxroot '
                 }
     answers = {}
     for label, question in questions.items():
@@ -380,15 +383,18 @@ def handle_quickstart(args):
         helpmsg += "We shall walk you thorugh a series of questions"
          
         answersd = gatherinfo()
-        print(answersd)
         
         try:
             shutil.copytree('/usr/local/config/', CONFIGDIR)
         except Exception as e:
             print(e)
-
+            raise
+        
         #now lets update the config file
-        confd = read_disk_config()
+        confd, hasconfigdir = read_disk_config()
+        confd.update(answersd) # !!!!
+        write_disk_config(confd)
+        print("We have adjusted the config file at {} with your answers. PLease check".format(CONFIGLOCATION))
 
 def handle_tests(args):
 
