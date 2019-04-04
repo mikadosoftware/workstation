@@ -182,11 +182,8 @@ Usage:
     devstation.py config 
     devstation.py start (latest | next) 
     devstation.py login (latest | next)
-    devstation.py rebuild (latest | next)
-    devstation.py status 
+    devstation.py buildDocker (latest | next)
     devstation.py makeDockerfile (latest | next)
-    devstation.py runtests
-    devstation.py emit
     devstation.py quickstart
     devstation.py (-h | --help )
 
@@ -348,7 +345,7 @@ def handle_login(args):
     spawn_sibling_console()
 
 
-def handle_rebuild(args):
+def handle_buildDocker(args):
     cmd = build_docker_build(latest=args["latest"])
     print(cmd)
     run_subprocess(cmd)
@@ -365,7 +362,7 @@ def hasValidConfig():
 
 import shutil
 def gatherinfo():
-    questions = {'username': 'What is username to use?',
+    questions = {'username': 'What username should be the default (only) on your immutable workstation?',
                 }
     answers = {}
     for label, question in questions.items():
@@ -394,34 +391,7 @@ def handle_quickstart(args):
         confd, hasconfigdir = read_disk_config()
         confd.update(answersd) # !!!!
         write_disk_config(confd)
-        print("We have adjusted the config file at {} with your answers. PLease check".format(CONFIGLOCATION))
-
-def handle_tests(args):
-
-    print("\n### Quick Testing - args\n")
-    pp(args)
-    print("\n### Output of build_dockerrun()\n")
-    print(build_dockerrun())
-    print("\n### Output of build_docker_build\n")
-    pp(build_docker_build())
-    print("\n### Output of build_sshcmd()\n")
-    pp(build_sshcmd())
-    show_config()
-
-    # runtests()
-
-
-def handle_emit(args):
-    latest = args["latest"]
-    cmds = build_dockerrun(latest)
-    with open("run.sh", "w") as fo:
-        fo.write("\n### Output of build_docker_run\n")
-        fo.write("\n".join(cmds))
-
-    pp(build_docker_build(latest))
-    print("\n### Output of build_sshcmd()\n")
-    pp(build_sshcmd())
-
+        print("We have adjusted the config file at {} with your answers. Please check".format(CONFIGLOCATION))
 
 def handle_unknown():
     print("Unknown request please type `devstation --help`")
@@ -463,7 +433,7 @@ def makeDocker(latest=True):
     fo = open(pathtodockerfile, "w")
     fo.write(outputs)
     fo.close()
-    telluser("Written new Dockerfile at {}".format(filepath))
+    telluser("Written new Dockerfile at {}".format(pathtodockerfile))
     
 def telluser(msg):
     print(msg)
@@ -480,16 +450,10 @@ def run(args):
         handle_start(args)
     elif args["login"]:
         handle_login(args)
-    elif args["rebuild"]:
-        handle_rebuild(args)
-    elif args["status"]:
-        handle_status(args)
-    elif args["runtests"]:
-        handle_tests(args)
+    elif args["buildDocker"]:
+        handle_buildDocker(args)
     elif args["makeDockerfile"]:
         handle_makeDockerfile(args)
-    elif args["emit"]:
-        handle_emit(args)
     else:
         handle_unknown()
 
