@@ -27,20 +27,20 @@ the host machine - do so using
 
 Once this is done, you should be able to run 
 
-  ./devstation.py
+  ./immutableworkstation.py
 
 And see the help options::
 
     Usage:
-        devstation.py config 
-        devstation.py start (latest | next) 
-        devstation.py login (latest | next)
-        devstation.py rebuild (latest | next)
-        devstation.py status 
-        devstation.py makeDockerfile 
-        devstation.py runtests
-        devstation.py quickstart
-        devstation.py (-h | --help )
+        immutableworkstation.py config 
+        immutableworkstation.py start (latest | next) 
+        immutableworkstation.py login (latest | next)
+        immutableworkstation.py rebuild (latest | next)
+        immutableworkstation.py status 
+        immutableworkstation.py makeDockerfile 
+        immutableworkstation.py runtests
+        immutableworkstation.py quickstart
+        immutableworkstation.py (-h | --help )
 
     Options:
         -h --help    Show this screen
@@ -49,7 +49,7 @@ And see the help options::
 Configuration
 -------------
 
-Initially `devstation.py` can run without a config folder,
+Initially `immutableworkstation.py` can run without a config folder,
 but pretty much the only thing you can do is `quickstart` which 
 will help setup a local config folder.
 
@@ -179,13 +179,15 @@ DRYRUN = False
 DOCOPT_HELP = """devstation 
 
 Usage:
-    devstation.py config 
-    devstation.py start (latest | next) 
-    devstation.py login (latest | next)
-    devstation.py buildDocker (latest | next)
-    devstation.py makeDockerfile (latest | next)
-    devstation.py quickstart
-    devstation.py (-h | --help )
+    immutableworkstation.py config 
+    immutableworkstation.py start (latest | next) 
+    immutableworkstation.py stop (latest | next) 
+    immutableworkstation.py login (latest | next)
+    immutableworkstation.py buildDocker (latest | next)
+    immutableworkstation.py makeDockerfile (latest | next)
+    immutableworkstation.py status
+    immutableworkstation.py quickstart
+    immutableworkstation.py (-h | --help )
 
 Options:
     -h --help    Show this screen
@@ -195,7 +197,7 @@ Options:
 DOCOPT_HELP_SHORT = '''We cannot detect a conifg folder at ~/.devstation - quickstart to create
 
 Usage:
-    devstation.py quickstart 
+    immutableworkstation.py quickstart 
 
  '''
 
@@ -346,15 +348,25 @@ def handle_login(args):
 
 
 def handle_buildDocker(args):
+    """Trigger the processes to create new dockerfile and then build image. """
+    makeDocker(latest=args["latest"])
     cmd = build_docker_build(latest=args["latest"])
-    print(cmd)
     run_subprocess(cmd)
 
 
 def handle_status(args):
-    print("To Be Done")
+    """Show container status. """
+    cmd = 'sudo docker container ls'
+    run_subprocess(cmd)
 
-
+def handle_stop(args):
+    """Kill the specified instance. """
+    _latest= LATEST if args["latest"] else NEXT
+    #: rewrite so this is not in two places
+    instance_name = "run_{}_{}".format(CONFD["instance_name"], _latest)
+    cmd = 'sudo docker container kill {}'.format(instance_name)
+    run_subprocess(cmd)
+    
 def hasValidConfig():
     """This is a placeholder for future development on checking curr env. """
     has_config_file = os.path.isfile(CONFIGLOCATION)
@@ -371,16 +383,20 @@ def gatherinfo():
     return answers
 
 def handle_quickstart(args):
-    """ """
+    """From pacakge data files copy into this users local dir.
+
+    ALso adjust config based on questions asked of user in
+    sphinx_quickstart style
+
+    """
     helpmsg = ''
     if hasValidConfig():
         helpmsg += """You appear to have an existing config in {}.  
-                      Please adjust it manually - view docs for help.""".format(CONFIGLOCATION)
+                      Please adjust it manually - view docs for
+        help.""".format(CONFIGLOCATION)
     if not hasValidConfig():
         helpmsg += "We shall walk you thorugh a series of questions"
-         
         answersd = gatherinfo()
-        
         try:
             shutil.copytree('/usr/local/config/', CONFIGDIR)
         except Exception as e:
@@ -454,6 +470,10 @@ def run(args):
         handle_buildDocker(args)
     elif args["makeDockerfile"]:
         handle_makeDockerfile(args)
+    elif args["status"]:
+        handle_status(args)
+    elif args["stop"]:
+        handle_stop(args)
     else:
         handle_unknown()
 

@@ -1,0 +1,3 @@
+[ ] Easier killing of docker instances
+[ ] have a minimal example .latest so can start from scratch then have "my" one in my own location.  test this on clean instances.
+[ ] apt-utils and debconfig
