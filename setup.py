@@ -76,7 +76,7 @@ setup(
 
     # files outside the package ...?
     
-    data_files=get_data_files(['config/',]),
+#    data_files=get_data_files(['config/',]),
     #files inside the pacakge ???
 #    package_data={'workstation': ['LICENSE', 'AUTHORS', 'config/*']},
 #    include_package_data=True,

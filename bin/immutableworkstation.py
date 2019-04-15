@@ -30,20 +30,11 @@ Once this is done, you should be able to run
   ./immutableworkstation.py
 
 
-
-
-
-
-Using latest and next
-pip install black as an example
-
+[ ] Implement expect-style testing so we can automate testing.
+[ ] put the home dir into git seperate to rest of pacakge (ie thats the indivudal part)
 [ ] put blog.mikadosoftware onto AWS and run this testing with docker on it.
 [ ] migrate rest of the articles there.
-
-[ ] create a plain docker instance and just import devstation, see if it works (ie clean install)
-
-
-
+[x] create a plain docker instance and just import devstation, see if it works (ie clean install)
 [ ] run todoinator over this and all my projects
 [ ] run the get github projects into one place 
 [ ] this is looking like a personal workstation setup thingy - immutable workstation, todos, gitgetter
@@ -57,7 +48,6 @@ from docopt import docopt
 import subprocess
 import time
 import os
-import json
 from pprint import pprint as pp
 from mikado.core import config
 
@@ -105,19 +95,30 @@ CONFIGDIR      = os.path.join(os.path.expanduser("~"),
                               ".immutableworkstation")
 CONFIGLOCATION = os.path.join(os.path.expanduser("~"),
                               ".immutableworkstation/config.ini")
+STARTER_CONFIG_URL='https://github.com/mikadosoftware/immutableworkstation_starter_config/archive/master.zip'
 
 #: pull out into a dedicated config file??
 def read_disk_config():
+    """
+
+    Volumes - this is tricky to bend .ini files to handle lists of tuples
+    The encoded json approach was just too fragile.
+    So a new section is being added 
+    """
     try:
         confd = config.read_ini(CONFIGLOCATION)["default"]
         ### This is ... fragile
         ### we are extracting json string from config and parsing here...
-        unparsedjsonstring = confd["volumes"]
-        d = json.loads(unparsedjsonstring)
-        confd["volumes"] = d
-        for k, i in confd.items():
-            if "~/" in i:
-                confd[k] = os.path.join(os.path.expanduser("~"), confd[k].replace("~/", ""))
+        #unparsedjsonstring = confd["volumes"]
+        volumesd = config.read_ini(CONFIGLOCATION)["volumes"]
+        confd['volumes'] = {}
+        for k, i in volumesd.items():
+            if "~/" in k:
+                #convert ~/data to /home/user/data
+                newkey =  os.path.join(os.path.expanduser("~"),
+                                       k.replace("~/", ""))
+                #we should have volumes = {'/home/user/data': '/var/data'} 
+                confd['volumes'][newkey] = i
                 hasconfigdir=True
     except:
         confd = {}
@@ -130,6 +131,7 @@ def write_disk_config(confd):
     
 
 CONFD, HASCONFIGDIR = read_disk_config()
+
 
 def build_sshcmd():
     """ """
@@ -281,32 +283,39 @@ def gatherinfo():
     return answers
 
 def handle_quickstart(args):
-    """From pacakge data files copy into this users local dir.
+    """We have a starter config on github. Pull that down and put in 
+       users homedir, then alter based on questions.
 
-    ALso adjust config based on questions asked of user in
-    sphinx_quickstart style
-
+    I am spending too long yak shaving on this app, and so will just
+    print instructions and look to automate it later.
     """
     helpmsg = ''
     if hasValidConfig():
         helpmsg += """You appear to have an existing config in {}.  
                       Please adjust it manually - view docs for
         help.""".format(CONFIGLOCATION)
-    if not hasValidConfig():
-        helpmsg += "We shall walk you thorugh a series of questions"
-        answersd = gatherinfo()
-        try:
-            shutil.copytree('/usr/local/config/', CONFIGDIR)
-        except Exception as e:
-            print(e)
-            raise
         
-        #now lets update the config file
-        confd, hasconfigdir = read_disk_config()
-        confd.update(answersd) # !!!!
-        write_disk_config(confd)
-        print("We have adjusted the config file at {} with your answers. Please check".format(CONFIGLOCATION))
+    if not hasValidConfig():
+        helpmsg += """ In the future this app will walk you through a series of
+questions, but for now please can you download and unzip into {} the
+starter config stored at {}.  You should have a directory layout like::
 
+  .immutableworkstation
+  |
+  -config.ini
+  |
+  -.next/
+  -.latest/
+
+You should copy these into *your* github repo, and then update the 
+templates to your needs, as you find a new package to be added to your 
+workstation, adjust the config needed.
+
+""".format(CONFIGDIR,
+                                      STARTER_CONFIG_URL)
+        
+    print(helpmsg)
+    
 def handle_unknown():
     print("Unknown request please type `devstation --help`")
 
