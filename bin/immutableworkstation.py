@@ -56,7 +56,7 @@ handler.setLevel(logging.INFO)
 log.addHandler(handler)
 
 DRYRUN = False
-PDB=True
+PDB = False
 
 #: usage defintons
 DOCOPT_HELP = """immutableworkstation
@@ -77,22 +77,22 @@ Options:
 
 """
 
-DOCOPT_HELP_SHORT = '''We cannot detect a conifg folder at ~/.immutableworkstation - quickstart to create
+DOCOPT_HELP_SHORT = """We cannot detect a conifg folder at ~/.immutableworkstation - quickstart to create
 
 Usage:
     immutableworkstation.py quickstart 
 
- '''
+ """
 
 ############### Config
 LATEST = "latest"
 NEXT = "next"
 # This is a 'well-known' location
-CONFIGDIR      = os.path.join(os.path.expanduser("~"),
-                              ".immutableworkstation")
-CONFIGLOCATION = os.path.join(os.path.expanduser("~"),
-                              ".immutableworkstation/config.ini")
-STARTER_CONFIG_URL='https://github.com/mikadosoftware/immutableworkstation_starter_config/archive/master.zip'
+CONFIGDIR = os.path.join(os.path.expanduser("~"), ".immutableworkstation")
+CONFIGLOCATION = os.path.join(
+    os.path.expanduser("~"), ".immutableworkstation/config.ini"
+)
+STARTER_CONFIG_URL = "https://github.com/mikadosoftware/immutableworkstation_starter_config/archive/master.zip"
 
 #: pull out into a dedicated config file??
 def read_disk_config():
@@ -103,41 +103,46 @@ def read_disk_config():
     So a new section is being added 
     """
     try:
-        
+
         confd = config.read_ini(CONFIGLOCATION)
-        if confd['devstation_config_root'].startswith('~/'):
-            confd['devstation_config_root'] = confd['devstation_config_root'].replace('~', os.path.expanduser("~"))
+        if confd["devstation_config_root"].startswith("~/"):
+            confd["devstation_config_root"] = confd["devstation_config_root"].replace(
+                "~", os.path.expanduser("~")
+            )
         volumesd = config.read_ini(CONFIGLOCATION)["volumes"]
         #: we want to convert an ini section to a dict.
-        confd['volumes'] = {}
+        confd["volumes"] = {}
         for k, i in volumesd.items():
             if "~/" in k:
-                #convert ~/data to /home/user/data
-                newkey =  os.path.join(os.path.expanduser("~"),
-                                       k.replace("~/", ""))
-                #we should have volumes = {'/home/user/data': '/var/data'} 
-                confd['volumes'][newkey] = i
-                hasconfigdir=True
+                # convert ~/data to /home/user/data
+                newkey = os.path.join(os.path.expanduser("~"), k.replace("~/", ""))
+                # we should have volumes = {'/home/user/data': '/var/data'}
+                confd["volumes"][newkey] = i
+                hasconfigdir = True
     except Exception as e:
         log.error("Failed to read config - error is %s", e)
         if PDB:
-            import pdb; pdb.set_trace()
+            import pdb
+
+            pdb.set_trace()
         confd = {}
-        hasconfigdir=False
+        hasconfigdir = False
     return confd, hasconfigdir
+
 
 def write_disk_config(confd):
     """ """
     config.write_ini(confd, CONFIGLOCATION)
-    
+
 
 CONFD, HASCONFIGDIR = read_disk_config()
 if PDB:
     print(CONFD)
 
+
 def build_sshcmd():
     """Create the command used to connect to running docker via ssh."""
-    
+
     return "ssh -X {username}@{localhost} -p {ssh_port}".format(**CONFD)
 
 
@@ -259,31 +264,38 @@ def handle_buildDocker(args):
 
 def handle_status(args):
     """Show container status. """
-    cmd = 'sudo docker container ls'
+    cmd = "sudo docker container ls"
     run_subprocess(cmd)
+
 
 def handle_stop(args):
     """Kill the specified instance. """
-    _latest= LATEST if args["latest"] else NEXT
+    _latest = LATEST if args["latest"] else NEXT
     #: rewrite so this is not in two places
     instance_name = "run_{}_{}".format(CONFD["instance_name"], _latest)
-    cmd = 'sudo docker container kill {}'.format(instance_name)
+    cmd = "sudo docker container kill {}".format(instance_name)
     run_subprocess(cmd)
-    
+
+
 def hasValidConfig():
     """This is a placeholder for future development on checking curr env. """
     has_config_file = os.path.isfile(CONFIGLOCATION)
     return all([has_config_file])
 
+
 import shutil
+
+
 def gatherinfo():
-    questions = {'username': 'What username should be the default (only) on your immutable workstation?',
-                }
+    questions = {
+        "username": "What username should be the default (only) on your immutable workstation?"
+    }
     answers = {}
     for label, question in questions.items():
         answer = input(question)
         answers[label] = answer
     return answers
+
 
 def handle_quickstart(args):
     """We have a starter config on github. Pull that down and put in 
@@ -292,12 +304,14 @@ def handle_quickstart(args):
     I am spending too long yak shaving on this app, and so will just
     print instructions and look to automate it later.
     """
-    helpmsg = ''
+    helpmsg = ""
     if hasValidConfig():
         helpmsg += """You appear to have an existing config in {}.  
                       Please adjust it manually - view docs for
-        help.""".format(CONFIGLOCATION)
-        
+        help.""".format(
+            CONFIGLOCATION
+        )
+
     if not hasValidConfig():
         helpmsg += """ In the future this app will walk you through a series of
 questions, but for now please can you download and unzip into {} the
@@ -314,11 +328,13 @@ You should copy these into *your* github repo, and then update the
 templates to your needs, as you find a new package to be added to your 
 workstation, adjust the config needed.
 
-""".format(CONFIGDIR,
-                                      STARTER_CONFIG_URL)
-        
+""".format(
+            CONFIGDIR, STARTER_CONFIG_URL
+        )
+
     print(helpmsg)
-    
+
+
 def handle_unknown():
     print("Unknown request please type `devstation --help`")
 
@@ -326,7 +342,7 @@ def handle_unknown():
 def handle_makeDockerfile(args):
     makeDocker(latest=args["latest"])
 
-    
+
 def makeDocker(latest=True):
     """Take a .skeleton file, and replace defined markup with 
        contents of txt files
@@ -341,10 +357,10 @@ def makeDocker(latest=True):
 
     """
 
-    _latest = "."+LATEST if latest else "."+NEXT
+    _latest = "." + LATEST if latest else "." + NEXT
     current_folder = os.path.join(CONFD["devstation_config_root"], _latest)
-    templates_folder = os.path.join(current_folder, 'templates') 
-    pathtodockerfile = os.path.join(current_folder, 'Dockerfile')
+    templates_folder = os.path.join(current_folder, "templates")
+    pathtodockerfile = os.path.join(current_folder, "Dockerfile")
     skeleton = "dockerfile.skeleton"
     outputs = ""
     with open(os.path.join(templates_folder, skeleton)) as fo:
@@ -360,14 +376,16 @@ def makeDocker(latest=True):
     fo.write(outputs)
     fo.close()
     telluser("Written new Dockerfile at {}".format(pathtodockerfile))
-    
+
+
 def telluser(msg):
     print(msg)
+
 
 def run(args):
 
     #: start with quickstart as it may be our only options
-    #: [ ] make this safer with .get 
+    #: [ ] make this safer with .get
     if args["quickstart"]:
         handle_quickstart(args)
     elif args["config"]:
@@ -390,11 +408,12 @@ def run(args):
 
 def runtests():
     import doctest
+
     doctest.testmod()
 
 
 def main():
-    
+
     ## if we have not quickstart'd the config dir, only show quickstart option.
     if HASCONFIGDIR:
         args = docopt(DOCOPT_HELP)
