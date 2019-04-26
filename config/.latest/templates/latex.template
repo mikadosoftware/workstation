@@ -1,7 +1,0 @@
-RUN apt-get install -y texlive-base \
-                       texlive-latex-recommended \
-                       texlive-latex-extra \
-                       texlive-fonts-recommended \
-                       texlive-fonts-extra \
-                       texlive-latex-base \
-                       texlive-font-utils 
