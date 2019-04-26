@@ -31,15 +31,11 @@ Once this is done, you should be able to run
 
 
 [ ] Implement expect-style testing so we can automate testing.
-[ ] put the home dir into git seperate to rest of pacakge (ie thats the indivudal part)
+[x] put the home dir into git seperate to rest of pacakge (ie thats the indivudal part)
 [ ] put blog.mikadosoftware onto AWS and run this testing with docker on it.
 [ ] migrate rest of the articles there.
 [x] create a plain docker instance and just import devstation, see if it works (ie clean install)
-[ ] run todoinator over this and all my projects
 [ ] run the get github projects into one place 
-[ ] this is looking like a personal workstation setup thingy - immutable workstation, todos, gitgetter
-[ ] launch tester docker with access to this projects so can pip -e, then 
-    ensure it can build locally the config etc correctly.
 
 """
 ##### imports #####
@@ -60,6 +56,7 @@ handler.setLevel(logging.INFO)
 log.addHandler(handler)
 
 DRYRUN = False
+PDB=True
 
 #: usage defintons
 DOCOPT_HELP = """immutableworkstation
@@ -106,11 +103,12 @@ def read_disk_config():
     So a new section is being added 
     """
     try:
-        confd = config.read_ini(CONFIGLOCATION)["default"]
-        ### This is ... fragile
-        ### we are extracting json string from config and parsing here...
-        #unparsedjsonstring = confd["volumes"]
+        
+        confd = config.read_ini(CONFIGLOCATION)
+        if confd['devstation_config_root'].startswith('~/'):
+            confd['devstation_config_root'] = confd['devstation_config_root'].replace('~', os.path.expanduser("~"))
         volumesd = config.read_ini(CONFIGLOCATION)["volumes"]
+        #: we want to convert an ini section to a dict.
         confd['volumes'] = {}
         for k, i in volumesd.items():
             if "~/" in k:
@@ -120,7 +118,10 @@ def read_disk_config():
                 #we should have volumes = {'/home/user/data': '/var/data'} 
                 confd['volumes'][newkey] = i
                 hasconfigdir=True
-    except:
+    except Exception as e:
+        log.error("Failed to read config - error is %s", e)
+        if PDB:
+            import pdb; pdb.set_trace()
         confd = {}
         hasconfigdir=False
     return confd, hasconfigdir
@@ -131,15 +132,17 @@ def write_disk_config(confd):
     
 
 CONFD, HASCONFIGDIR = read_disk_config()
-
+if PDB:
+    print(CONFD)
 
 def build_sshcmd():
-    """ """
+    """Create the command used to connect to running docker via ssh."""
+    
     return "ssh -X {username}@{localhost} -p {ssh_port}".format(**CONFD)
 
 
 def build_dockerrun(latest=True):
-    """ 
+    """create the command used to start docker instance. 
     
     tagname of image
     name of running instance
@@ -171,7 +174,7 @@ def build_dockerrun(latest=True):
 
 
 def build_docker_build(latest=True):
-    """Return command to (re)build the container.
+    """Create command used to (re)build the container.
 
     We store the Dockerfile (as that name)
     in dir .next or .latest so that we can 
@@ -188,7 +191,7 @@ def build_docker_build(latest=True):
 
 
 def run_subprocess(cmd):
-    """ """
+    """Run the given command in a subprocess."""
     if DRYRUN:
         print(cmd)
     else:

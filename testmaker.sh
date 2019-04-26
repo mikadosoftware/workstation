@@ -9,4 +9,7 @@ echo pip3 install /var/projects/workstation/docopt-0.6.2.tar.gz >> $TGT
 
 ## use this to build a container 
 ## sudo docker build -t tag_tester .
-sudo docker run -i -v /home/pbrian/projects:/var/projects -t tag_tester:latest
+sudo docker run -i \
+     -v /home/pbrian/projects:/var/projects \
+     -v /home/pbrian/.immutableworkstation:/var/.immutableworkstation \
+     -t tag_tester:latest
