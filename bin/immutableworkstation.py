@@ -77,12 +77,18 @@ Options:
 
 """
 
-DOCOPT_HELP_SHORT = """We cannot detect a conifg folder at ~/.immutableworkstation - quickstart to create
+DOCOPT_HELP_SHORT = """
+`immutableworkstation` can create docker images from config,
+and launch those images so that as a developer you can work inside
+the container, but using X-applications on the host laptop.
 
-Usage:
-    immutableworkstation.py quickstart 
+So you can define your workstation in code, but take it with you from 
+laptop to home to work.
 
- """
+To get started, download the quickstart config - use `quickstart` argument
+to get location.  (we will improve the quickstart soon).
+
+"""
 
 ############### Config
 LATEST = "latest"
@@ -198,7 +204,7 @@ def build_docker_build(latest=True):
 def run_subprocess(cmd):
     """Run the given command in a subprocess."""
     if DRYRUN:
-        print(cmd)
+        telluser(cmd)
     else:
         subprocess.run(cmd, shell=True)
 
@@ -232,18 +238,17 @@ def show_config(confd=None):
     s = ""
     for key, item in confd.items():
         s += "{} : {}\n".format(key, item)
-    print(s)
+    telluser(s)
 
 
 def handle_start(args):
     # do start up here
     cmds = build_dockerrun(args["latest"])
     for cmd in cmds:
-        # TODO get better solution
-        print(cmd)
+        # TODO get better solution than sleep
         subprocess.run(cmd, shell=True)
         time.sleep(2)  # brute force give docker time to complete its stuff.
-    time.sleep(10)  # As above, but let docker catch up before login
+    time.sleep(7)  # As above, but let docker catch up before login
     handle_login(args)
 
 
@@ -306,9 +311,8 @@ def handle_quickstart(args):
     """
     helpmsg = ""
     if hasValidConfig():
-        helpmsg += """You appear to have an existing config in {}.  
-                      Please adjust it manually - view docs for
-        help.""".format(
+        helpmsg += """You appear to have an existing config in {}.
+Please adjust it manually - view docs for help.""".format(
             CONFIGLOCATION
         )
 
@@ -332,11 +336,11 @@ workstation, adjust the config needed.
             CONFIGDIR, STARTER_CONFIG_URL
         )
 
-    print(helpmsg)
+    telluser(helpmsg)
 
 
 def handle_unknown():
-    print("Unknown request please type `devstation --help`")
+    telluser("Unknown request please type `devstation --help`")
 
 
 def handle_makeDockerfile(args):
@@ -379,6 +383,9 @@ def makeDocker(latest=True):
 
 
 def telluser(msg):
+    """ aggregate print stmts into one place."""
+    #handle my weird formatting
+    
     print(msg)
 
 
