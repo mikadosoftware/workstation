@@ -24,7 +24,7 @@ First run::
 	immutableworkstation.py stop (latest | next) 
 	immutableworkstation.py login (latest | next)
 	immutableworkstation.py buildDocker (latest | next)
-	immutableworkstation.py makeDockerfile (latest | next)
+	immutableworkstation.py next2last
 	immutableworkstation.py status
 	immutableworkstation.py quickstart
 	immutableworkstation.py (-h | --help )
@@ -105,6 +105,7 @@ Getting started
 
 
 
+
 we are targetting windows, linux and apple machines so will need
 sensible simple scripts else the start up and try me out barrier will
 be too high.  however having python scripts makes the development part
@@ -135,3 +136,29 @@ Its that simple. We can play around with variables if we really need to.
 
 
 
+Building Next and Last
+----------------------
+
+The idea is that I think of something I should have added to my workstation
+such as a python package in `requirements.txt` or some .deb file.
+
+I go to ~/.immutableworkstation - where the .next and .latest copies of
+the config is kept.  I change say the requirements.txt file in .next then I
+rebuild docker image for next::
+
+   $ immutableworkstation.py buildDocker next
+
+Then I can try that out ::
+
+   $ immutableworkstation.py start next
+
+If all is good I can prep it for my next go with latest::
+
+   $ immutableworkstation.py next2last
+
+   (this will move the old .latest files and replace them with
+   .next. You will be prompted)
+
+   $ immutableworkstation.py buildDocker latest
+
+   Now we can `start latest` again

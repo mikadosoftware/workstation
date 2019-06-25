@@ -26,8 +26,13 @@ hole wherever I build my workstation.
 
 I use X-Forwarding to run the same visual tools, configured the same
 way, on any box I am working on, and *anything* that changes I keep in
-source control (here in this repo) and my secrets are all stored on a USB key that I carry with me and plugin to the host - so my GitHub ssh key is on a USB stick, that when I plug it in, .
+source control (here in this repo) and my secrets are all stored on a
+USB key that I carry with me and plugin to the host - so my GitHub ssh
+key is on a USB stick, that when I plug it in, .
     
+
+Documentation can be found at https://workstation.readthedocs.io/en/latest/
+
 
 Using X Windows
 ===============
@@ -60,8 +65,8 @@ We then build the above image::
 
     # sudo docker build -t devbox:latest .
 
-Now run it, listening on the localhost port of 2222, which is then mapped to 22 on the container
-::
+Now run it, listening on the localhost port of 2222, which is then
+mapped to 22 on the container::
 
     # docker run -d  --name devbox-live -v /data/projects:/projects -p 2222:22 devbox:latest
     
@@ -83,10 +88,10 @@ on the container, and it will appear on the laptop we are running on.
 Using Sound
 ===========
 
-There is a developer who (I think) works for Docker and has a list of YouTube
-videos showing how to do things like run Skype on Docker.  She developed a
-`snd` device parameter for `docker run`, which seems to work fine. I don't do
-much with it but should expand on it.  
+There is a developer who (I think) works for Docker and has a list of
+YouTube videos showing how to do things like run Skype on Docker.  She
+developed a `snd` device parameter for `docker run`, which seems to
+work fine. I don't do much with it but should expand on it.
 
 Using Secrets
 =============
@@ -109,12 +114,12 @@ Using Secrets
 Using Dropbox
 =============
 
-I have some files I keep on private GitHub repos, but for most documents
-(things like Bank statements) it seems easier to just store them on Dropbox.
-I merely have my Dropbox folder on my home dir, and mount it into Docker.
-It seems to work with no horrible clashes so I will keep it. At some point it
-seems sensible to migrate to having the Dropbox client actually running on
-the docker instance.
+I have some files I keep on private GitHub repos, but for most
+documents (things like Bank statements) it seems easier to just store
+them on Dropbox.  I merely have my Dropbox folder on my home dir, and
+mount it into Docker.  It seems to work with no horrible clashes so I
+will keep it. At some point it seems sensible to migrate to having the
+Dropbox client actually running on the docker instance.
 
 Its not terribly secure, but it seems good enough.
 
@@ -150,7 +155,10 @@ TODO::
 
 Building on Mac OS
 ------------------
-You will need a XServer running on the Mac.  I recommend using XQuartz - this will need to be installed and running before starting the ssh -X process so the ssh session can connect to something 
+
+You will need a XServer running on the Mac.  I recommend using XQuartz
+- this will need to be installed and running before starting the ssh
+-X process so the ssh session can connect to something
 
 Roadmap
 See `Roadmap <docs/roadmap.rst>`_

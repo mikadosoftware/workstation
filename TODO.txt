@@ -1,3 +1,6 @@
-[ ] Easier killing of docker instances
-[ ] have a minimal example .latest so can start from scratch then have "my" one in my own location.  test this on clean instances.
-[ ] apt-utils and debconfig
+[X] make emacs build during docker run
+[X] build githib/hub from source at https://github.com/github/hub#source
+[X] migrate to seperate git repo for the host .immutable - so simmpler then
+[x] Easier killing of docker instances
+[X] have a minimal example .latest so can start from scratch then have "my" one in my own location.  test this on clean instances.
+

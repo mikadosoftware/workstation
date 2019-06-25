@@ -67,7 +67,7 @@ Usage:
     immutableworkstation.py stop (latest | next) 
     immutableworkstation.py login (latest | next)
     immutableworkstation.py buildDocker (latest | next)
-    immutableworkstation.py makeDockerfile (latest | next)
+    immutableworkstation.py next2last
     immutableworkstation.py status
     immutableworkstation.py quickstart
     immutableworkstation.py (-h | --help )
@@ -129,7 +129,6 @@ def read_disk_config():
         log.error("Failed to read config - error is %s", e)
         if PDB:
             import pdb
-
             pdb.set_trace()
         confd = {}
         hasconfigdir = False
@@ -167,7 +166,7 @@ def build_dockerrun(latest=True):
 
     return [
         "sudo docker container prune -f",
-        f"sudo docker kill {instance_name}",
+        #f"sudo docker kill {instance_name}",
         """sudo docker run -d \
         {vols} \
         --name {instance_name} \
@@ -206,6 +205,7 @@ def run_subprocess(cmd):
     if DRYRUN:
         telluser(cmd)
     else:
+        print("...", cmd)
         subprocess.run(cmd, shell=True)
 
 
@@ -338,13 +338,22 @@ workstation, adjust the config needed.
 
     telluser(helpmsg)
 
-
+def handle_next2last(args):
+    """ """
+    #Note the extra dot
+    _latestdir = '{}/.{}'.format(CONFIGDIR, LATEST)
+    _nextdir   = '{}/.{}'.format(CONFIGDIR, NEXT)
+    _backupdir = '{}/latest.bak'.format(CONFIGDIR)
+    
+    cmds = ['rm -rf {}'.format(_backupdir),
+            'mv -f {}  {}'.format(_latestdir, _backupdir),
+            'cp -r {} {}'.format(_nextdir, _latestdir)]
+    input("About to move {} and replace with {}. Hit any key".format(_latestdir, _nextdir))
+    for cmd in cmds:
+        subprocess.run(cmd, shell=True)
+        
 def handle_unknown():
     telluser("Unknown request please type `devstation --help`")
-
-
-def handle_makeDockerfile(args):
-    makeDocker(latest=args["latest"])
 
 
 def makeDocker(latest=True):
@@ -403,8 +412,8 @@ def run(args):
         handle_login(args)
     elif args["buildDocker"]:
         handle_buildDocker(args)
-    elif args["makeDockerfile"]:
-        handle_makeDockerfile(args)
+    elif args["next2last"]:
+        handle_next2last(args)
     elif args["status"]:
         handle_status(args)
     elif args["stop"]:
