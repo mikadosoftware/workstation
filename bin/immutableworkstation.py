@@ -46,6 +46,7 @@ import time
 import os
 from pprint import pprint as pp
 from mikado.core import config
+import shutil
 
 ##### Module setup #####
 # TODO: split out logging into common module
@@ -66,14 +67,17 @@ Usage:
     immutableworkstation.py start (latest | next) 
     immutableworkstation.py stop (latest | next) 
     immutableworkstation.py login (latest | next)
-    immutableworkstation.py buildDocker (latest | next)
+    immutableworkstation.py buildDocker (latest | next) [options]
     immutableworkstation.py next2last
     immutableworkstation.py status
     immutableworkstation.py quickstart
+    immutableworkstation.py test
     immutableworkstation.py (-h | --help )
+
 
 Options:
     -h --help    Show this screen
+    -d --dryrun  dryrun
 
 """
 
@@ -129,6 +133,7 @@ def read_disk_config():
         log.error("Failed to read config - error is %s", e)
         if PDB:
             import pdb
+
             pdb.set_trace()
         confd = {}
         hasconfigdir = False
@@ -166,7 +171,7 @@ def build_dockerrun(latest=True):
 
     return [
         "sudo docker container prune -f",
-        #f"sudo docker kill {instance_name}",
+        # f"sudo docker kill {instance_name}",
         """sudo docker run -d \
         {vols} \
         --name {instance_name} \
@@ -205,7 +210,6 @@ def run_subprocess(cmd):
     if DRYRUN:
         telluser(cmd)
     else:
-        print("...", cmd)
         subprocess.run(cmd, shell=True)
 
 
@@ -242,13 +246,19 @@ def show_config(confd=None):
 
 
 def handle_start(args):
+    """Perform cmsd needed to start the docker and login
+
+    I really need to monitor the success of the underlying
+    cmds, instead of brute force sleep.
+    [ ] {milestone} stop using sleep, monitor the subprocess for return values.
+    """
     # do start up here
     cmds = build_dockerrun(args["latest"])
     for cmd in cmds:
         # TODO get better solution than sleep
         subprocess.run(cmd, shell=True)
-        time.sleep(2)  # brute force give docker time to complete its stuff.
-    time.sleep(7)  # As above, but let docker catch up before login
+        time.sleep(8)  # brute force give docker time to complete its stuff.
+    time.sleep(10)  # As above, but let docker catch up before login
     handle_login(args)
 
 
@@ -286,9 +296,6 @@ def hasValidConfig():
     """This is a placeholder for future development on checking curr env. """
     has_config_file = os.path.isfile(CONFIGLOCATION)
     return all([has_config_file])
-
-
-import shutil
 
 
 def gatherinfo():
@@ -338,20 +345,26 @@ workstation, adjust the config needed.
 
     telluser(helpmsg)
 
+
 def handle_next2last(args):
     """ """
-    #Note the extra dot
-    _latestdir = '{}/.{}'.format(CONFIGDIR, LATEST)
-    _nextdir   = '{}/.{}'.format(CONFIGDIR, NEXT)
-    _backupdir = '{}/latest.bak'.format(CONFIGDIR)
-    
-    cmds = ['rm -rf {}'.format(_backupdir),
-            'mv -f {}  {}'.format(_latestdir, _backupdir),
-            'cp -r {} {}'.format(_nextdir, _latestdir)]
-    input("About to move {} and replace with {}. Hit any key".format(_latestdir, _nextdir))
+    # Note the extra dot
+    _latestdir = "{}/.{}".format(CONFIGDIR, LATEST)
+    _nextdir = "{}/.{}".format(CONFIGDIR, NEXT)
+    _backupdir = "{}/latest.bak".format(CONFIGDIR)
+
+    cmds = [
+        "rm -rf {}".format(_backupdir),
+        "mv -f {}  {}".format(_latestdir, _backupdir),
+        "cp -r {} {}".format(_nextdir, _latestdir),
+    ]
+    input(
+        "About to move {} and replace with {}. Hit any key".format(_latestdir, _nextdir)
+    )
     for cmd in cmds:
         subprocess.run(cmd, shell=True)
-        
+
+
 def handle_unknown():
     telluser("Unknown request please type `devstation --help`")
 
@@ -393,8 +406,7 @@ def makeDocker(latest=True):
 
 def telluser(msg):
     """ aggregate print stmts into one place."""
-    #handle my weird formatting
-    
+    # handle my weird formatting
     print(msg)
 
 
@@ -418,6 +430,8 @@ def run(args):
         handle_status(args)
     elif args["stop"]:
         handle_stop(args)
+    elif args["test"]:
+        runtests()
     else:
         handle_unknown()
 
@@ -429,12 +443,14 @@ def runtests():
 
 
 def main():
-
+    global DRYRUN
     ## if we have not quickstart'd the config dir, only show quickstart option.
     if HASCONFIGDIR:
         args = docopt(DOCOPT_HELP)
     else:
         args = docopt(DOCOPT_HELP_SHORT)
+    if args["--dryrun"]:
+        DRYRUN = True
     run(args)
 
 

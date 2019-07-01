@@ -4,7 +4,48 @@ ImmutableWorkstation
 
 Intro
 =====
-See README
+
+
+The concept of an *immutable server* for production deployment is now
+fully mainstream, but the same concepts underpinning servers is less
+applied to the workstations on which the developers work.
+
+We have a tendency to start with a nice clean laptop, a Mac if we are
+lucky, and slowly but surely *stuff* creeps on, dependencies we did
+not know about appear and we stop trusting the platform we stand on.
+
+So I have used Docker to make my own *immutable workstation*.  It
+means that I get *exactly* the same stack running on my
+banged-about-on-commute laptop, my wife's nice big screen iMac and
+even on my client's Windows box, that I had to use for client's policy
+reasons.  So wherever I was, I was using the same config of emacs -
+using it on a windows machine or a mac or a Linux host, it was the
+same emacs, and the same nice set of tools like grep.  And it was
+running XWindows in those places too.
+
+Secondly, I get the ratchet effect of continuously improving security
+- I can always improve something on the install, and just rerun
+`docker build` and I have permanently remembered to fix that security
+hole wherever I build my workstation.
+
+I use X-Forwarding to run the same visual tools, configured the same
+way, on any box I am working on, and *anything* that changes I keep in
+source control (here in this repo) and my secrets are all stored on a
+USB key that I carry with me and plugin to the host - so my GitHub ssh
+key is on a USB stick, that when I plug it in, .
+    
+
+Documentation can be found at https://workstation.readthedocs.io/en/latest/
+
+::
+
+    `immutableworkstation` can create docker images from config, and
+    launch those images so that as a developer you can work inside the
+    container, but using X-applications on the host laptop.
+
+    So you can define your workstation in code, but take it with you
+    from laptop to home to work.
+
 
 
 Getting Started
@@ -14,7 +55,21 @@ Firstly install the python (3) package on your machine::
 
     sudo pip install immutableworkstation
 
-First run::
+First run:
+
+    $ immutableworkstation.py
+
+    Usage:
+	immutableworkstation.py quickstart
+
+You will need to follow the instructions on setting up
+config. Basically we need config stored in your local home dir in
+`.immutableworkstation`.  This will be the tempaltes etc to configure
+docker.  The only way to do this right now is copy from the example
+set in github. At some point I hope to improve the quickstart
+
+
+After config has been set up ::
 
     $ immutableworkstation.py
 
@@ -31,6 +86,25 @@ First run::
 
     Options:
 	-h --help    Show this screen
+
+
+Daily use case
+--------------
+
+So to start a fresh docker instance we use::
+
+    immutableworkstation.py start next
+
+THis will boot up docker and throw you a ssh login
+
+We can also open a new terminal into the same docker::
+
+    immutableworkstation.py login next
+
+And stop it ::
+
+    immutableworkstation.py stop next
+
 
 
 Configuration

@@ -1,9 +1,13 @@
 Roadmap
 =======
 
-I recently posted this project to Hacker News (Front Page!!!) and was pleasantly surprised by the positive response.  And so I feel a responsibility to actually improve the project and start ironing out bugs.
+I recently posted this project to Hacker News (Front Page!!!) and was
+pleasantly surprised by the positive response.  And so I feel a
+responsibility to actually improve the project and start ironing out
+bugs.
 
-This is then my roadmap for the next couple of weeks (well probably months)
+This is then my roadmap for the next couple of weeks (well probably
+months)
 
 Milestones 
 ==========
@@ -13,23 +17,42 @@ Milestones
 
 * Single point of entry
   A simple python CLI that will do the work of detecting OS somslighlty modified docker commands can run etc etc
+  (This has been the bulk of work here - really that took waaaay longer than I expected, epecially
+  with just doing this on commutes etc.)
 
 * Clean up docs
+  Still to do
 
 * split out the (very) specific hardcoded usernames etc
+  Mostly done I think
 
-* look at recipes / methods to build the final Dockerfile and make it more robust without losing the basic "it's just string formatting" part
 
-* Marketing 
-  well this was supposed to be just a personal project, and I don't see it as being the next big thing.  But enough people have noticed that it should be polished and given a run round the block.  Once it's stops being fun I will stop :-)
+* look at recipes / methods to build the final Dockerfile and make it
+  more robust without losing the basic "it's just string formatting"
+  part
+  Yeah thats ok. ish
 
-It also seems a good idea to use it for the "plumbing" portion of my new book - that is the dev and CI cycle
-I should have this as an exemplar dev / CI cycle - so 
+* Marketing
+
+  well this was supposed to be just a personal project, and I don't
+  see it as being the next big thing.  But enough people have noticed
+  that it should be polished and given a run round the block.  Once
+  it's stops being fun I will stop :-)
+
 
 * pre-commit hooks ensuring, lint, test, formatting, doc
-* Jenkins build on AWS leading to CI, docker deployment (err how??)
-* docs build
+  I use black ... does that count? No? Ok..
+  
 
-SImilar cases can be made for rewriting the CMS, and adding FIDO to the CMS
 
+2019
+----
+
+The plan here is to incorporate a very good suggestion by @bjornicus (#6)
+I relly do owe them an apology - early users should be gold.
+
+Then keep on dogfooding - its *usable* by me - some glitches
+(especially around the use of `sleep` and also failing to see the
+error response sent by sshd if there is an error (usually its the MiTM
+attack warning).
 

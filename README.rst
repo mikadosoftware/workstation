@@ -33,6 +33,15 @@ key is on a USB stick, that when I plug it in, .
 
 Documentation can be found at https://workstation.readthedocs.io/en/latest/
 
+::
+
+    `immutableworkstation` can create docker images from config, and
+    launch those images so that as a developer you can work inside the
+    container, but using X-applications on the host laptop.
+
+    So you can define your workstation in code, but take it with you
+    from laptop to home to work.
+
 
 Using X Windows
 ===============
