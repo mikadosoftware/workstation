@@ -83,4 +83,9 @@ setup(
     # Any scripts (i.e. python/bash) here will be added to PATH (/usr/local/bin)
     scripts=glob.glob('bin/*'),
 
+
+
+    install_requires=[
+        "mikado-core"
+    ]
 )
