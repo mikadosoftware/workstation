@@ -81,16 +81,14 @@ Options:
 
 """
 
-DOCOPT_HELP_SHORT = """
-`immutableworkstation` can create docker images from config,
-and launch those images so that as a developer you can work inside
-the container, but using X-applications on the host laptop.
+DOCOPT_HELP_SHORT = """immutableworkstation
 
-So you can define your workstation in code, but take it with you from 
-laptop to home to work.
+Usage:
+    immutableworkstation.py quickstart
 
-To get started, download the quickstart config - use `quickstart` argument
-to get location.  (we will improve the quickstart soon).
+Options:
+    -h --help    Show this screen
+    -d --dryrun  dryrun
 
 """
 
@@ -449,7 +447,7 @@ def main():
         args = docopt(DOCOPT_HELP)
     else:
         args = docopt(DOCOPT_HELP_SHORT)
-    if args["--dryrun"]:
+    if args.get("--dryrun", False):
         DRYRUN = True
     run(args)
 
