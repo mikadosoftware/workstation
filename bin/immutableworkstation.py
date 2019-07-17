@@ -64,9 +64,9 @@ DOCOPT_HELP = """immutableworkstation
 
 Usage:
     immutableworkstation.py config 
-    immutableworkstation.py start (latest | next) 
-    immutableworkstation.py stop (latest | next) 
-    immutableworkstation.py login (latest | next)
+    immutableworkstation.py start (latest | next) [options] 
+    immutableworkstation.py stop (latest | next) [options] 
+    immutableworkstation.py login (latest | next) [options]
     immutableworkstation.py buildDocker (latest | next) [options]
     immutableworkstation.py next2last
     immutableworkstation.py status
@@ -203,7 +203,7 @@ def build_docker_build(latest=True):
     )
 
 
-def run_subprocess(cmd):
+def run_subprocess(cmd, shell=None):
     """Run the given command in a subprocess."""
     if DRYRUN:
         telluser(cmd)
@@ -254,7 +254,7 @@ def handle_start(args):
     cmds = build_dockerrun(args["latest"])
     for cmd in cmds:
         # TODO get better solution than sleep
-        subprocess.run(cmd, shell=True)
+        run_subprocess(cmd, shell=True)
         time.sleep(8)  # brute force give docker time to complete its stuff.
     time.sleep(10)  # As above, but let docker catch up before login
     handle_login(args)
@@ -360,7 +360,7 @@ def handle_next2last(args):
         "About to move {} and replace with {}. Hit any key".format(_latestdir, _nextdir)
     )
     for cmd in cmds:
-        subprocess.run(cmd, shell=True)
+        run_subprocess(cmd, shell=True)
 
 
 def handle_unknown():
