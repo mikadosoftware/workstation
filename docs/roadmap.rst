@@ -7,10 +7,21 @@ responsibility to actually improve the project and start ironing out
 bugs.
 
 This is then my roadmap for the next couple of weeks (well probably
-months)
+months). Ok scratch that. Its been - months and months. Lots has happened
+and one big thing is how unmanageable X11 is outside of a linux host machine.
+Its frustrating so this leads to two new milestones (sadly).
 
 Milestones 
 ==========
+
+* Drop X11 support outside of Linux hosts.  And generally drop X11 support
+anyhow. Most things I care about do abysmally in X11-client-server mode across different machines - Firefox just curls up and dies frequently.  And this is such a edge case no one will support me hard.  And most of the time I only care about using emacs and I can telnet in for that.
+
+* But I really want a permanent web service running on my workstation that
+will act as a *dashboard* for the workstation, plus tell me useful things and
+be a simple place for any output to appear - where i might do 'webserver.open('~/foo.html')' what I really want is now 'put foo.html on port 1234 and let the dashboard know it should do somethign to show that'
+
+
 
 * Review of literature.
   A lot of similar projects have been mentioned - it is well worth covering the good bad and ugly and using that to inform the roadmap
