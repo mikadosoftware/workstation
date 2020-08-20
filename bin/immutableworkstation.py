@@ -223,8 +223,8 @@ def spawn_sibling_console():
 
     """
 
-    sshcmd = "{} {} &".format(CONFD["terminal_command"], build_sshcmd())
-    log.debug(sshcmd)
+    sshcmd = '{} "{}" &'.format(CONFD["terminal_command"], build_sshcmd())
+    log.info(sshcmd)
     run_subprocess(sshcmd)
 
 
