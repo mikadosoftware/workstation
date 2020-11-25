@@ -47,6 +47,7 @@ import os
 from pprint import pprint as pp
 from mikado.core import config
 import shutil
+import json
 
 ##### Module setup #####
 # TODO: split out logging into common module
@@ -58,6 +59,8 @@ log.addHandler(handler)
 
 DRYRUN = False
 PDB = False
+OCI_CMD = 'sudo docker'
+OCI_CMD = 'podman'
 
 #: usage defintons
 DOCOPT_HELP = """immutableworkstation
@@ -168,15 +171,15 @@ def build_dockerrun(latest=True):
         vols += "-v {}:{} ".format(hostpath, mountpath)
 
     return [
-        "sudo docker container prune -f",
-        # f"sudo docker kill {instance_name}",
-        """sudo docker run -d \
+        "{} container prune -f".format(OCI_CMD),
+        """{OCI_CMD} run -d \
         {vols} \
         --name {instance_name} \
         --device /dev/snd \
         -p {ssh_port}:22 \
         {tagname}:{_latest}
     """.format(
+            OCI_CMD=OCI_CMD,
             vols=vols,
             instance_name=instance_name,
             ssh_port=CONFD["ssh_port"],
@@ -195,19 +198,31 @@ def build_docker_build(latest=True):
     in the 'context' directory.
 
     """
-    tmpl = "sudo docker build -t {tagname}:{tagtag} {pathtodockerfile}"
+    tmpl = "{} build -t {{tagname}}:{{tagtag}} {{pathtodockerfile}}".format(OCI_CMD)
     _latest = LATEST if latest else NEXT
     pathtodockerfile = os.path.join(CONFD["devstation_config_root"], "." + _latest)
     return tmpl.format(
         tagname=CONFD["tagname"], tagtag=_latest, pathtodockerfile=pathtodockerfile
     )
 
+def read_subprocess(cmd):
+    """Run a command and return output """
+    
+    result = subprocess.run(cmd,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            universal_newlines=True,
+                            shell=True)
+    txt = result.stdout
+    return txt
 
+    
 def run_subprocess(cmd, shell=None):
     """Run the given command in a subprocess."""
     if DRYRUN:
         telluser(cmd)
     else:
+        log.info(cmd)
         subprocess.run(cmd, shell=True)
 
 
@@ -277,8 +292,13 @@ def handle_buildDocker(args):
 
 def handle_status(args):
     """Show container status. """
-    cmd = "sudo docker container ls"
+    cmd = "{} container ls".format(OCI_CMD)
     run_subprocess(cmd)
+    cmd = "{} inspect run_devstation_next".format(OCI_CMD)
+    txt = read_subprocess(cmd)
+    jsond = json.loads(txt)
+    ipaddress = jsond[0]['NetworkSettings']['IPAddress']
+    print('Use this ip address {}'.format(ipaddress))
 
 
 def handle_stop(args):
@@ -286,7 +306,7 @@ def handle_stop(args):
     _latest = LATEST if args["latest"] else NEXT
     #: rewrite so this is not in two places
     instance_name = "run_{}_{}".format(CONFD["instance_name"], _latest)
-    cmd = "sudo docker container kill {}".format(instance_name)
+    cmd = "{} container kill {}".format(OCI_CMD, instance_name)
     run_subprocess(cmd)
 
 
