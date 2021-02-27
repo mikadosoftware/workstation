@@ -37,6 +37,8 @@ Once this is done, you should be able to run
 [x] create a plain docker instance and just import devstation, see if it works (ie clean install)
 [ ] run the get github projects into one place 
 
+[ ] podman system prune : clean up a lot of cruft in docker areas.
+
 """
 ##### imports #####
 import logging, sys
@@ -177,6 +179,7 @@ def build_dockerrun(latest=True):
         --name {instance_name} \
         --device /dev/snd \
         -p {ssh_port}:22 \
+        --privileged \
         {tagname}:{_latest}
     """.format(
             OCI_CMD=OCI_CMD,
@@ -198,7 +201,7 @@ def build_docker_build(latest=True):
     in the 'context' directory.
 
     """
-    tmpl = "{} build -t {{tagname}}:{{tagtag}} {{pathtodockerfile}}".format(OCI_CMD)
+    tmpl = "{} build -t {{tagname}}:{{tagtag}} {{pathtodockerfile}} --squash".format(OCI_CMD)
     _latest = LATEST if latest else NEXT
     pathtodockerfile = os.path.join(CONFD["devstation_config_root"], "." + _latest)
     return tmpl.format(
