@@ -2,7 +2,7 @@ alabaster==0.7.9
 asn1crypto==0.24.0
 astroid==1.6.3
 attrs==18.1.0
-Babel==2.3.4
+Babel==2.9.1
 boto3==1.5.29
 botocore==1.8.43
 certifi==2017.7.27.1
