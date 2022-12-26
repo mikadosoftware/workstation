@@ -1,0 +1,6 @@
+# We install `hub` from github
+# We need to write our own scripts to use the underlying api calls
+
+#  # post a comment to issue #23 of the current repository
+#  $ hub api repos/{owner}/{repo}/issues/23/comments --raw-field "body=Nice!"
+

@@ -1,0 +1,4 @@
+
+### Other Dev Tools
+RUN apt-get install -y	whois
+

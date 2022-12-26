@@ -1,0 +1,28 @@
+#################### Misc config ##########################
+## Locales
+# We dont have any languages setup at this point
+# 
+RUN apt-get update && \
+    apt-get install -y locales && \
+    locale-gen en_GB.UTF-8 && \
+    update-locale LC_ALL=en_GB.UTF-8 LANGUAGE=en_GB.UTF-8 && \
+    apt-get clean
+    
+#these need to be run in user sections
+#RUN echo "export LC_ALL=en_GB.UTF-8" >> /home/pbrian/.bashrc
+#RUN echo "export LC_LANGUAGE=en_GB.UTF-8" >> /home/pbrian/.bashrc
+
+#THis should now work in our terminal (prints Greek for Thank you)
+#python3 -c "print(u''.join([u'\u0395', u'\u03c5', u'\u03c7', u'\u03B1', u'\u03c1', u'\u03B9', u'\u03C3', u'\u03c4', u'\u03c9']))"
+
+## fonts
+RUN apt-get -y install fonts-inconsolata
+
+ENV TZ=Europe/London
+#not ideal
+ENV DEBIAN_FRONTEND=noninteractive
+RUN DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && \
+    apt-get install -y tzdata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone

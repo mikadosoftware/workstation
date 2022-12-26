@@ -1,0 +1,4 @@
+#USER command in DOCKER to run correctly as me
+USER pbrian
+RUN emacs -nw --script $USERHOME/.emacs 
+USER root

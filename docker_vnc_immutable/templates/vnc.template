@@ -1,0 +1,11 @@
+# build the basic development world
+RUN apt-get update && \
+    apt-get install -y apt-transport-https \
+		       ca-certificates \
+                       software-properties-common \
+                       xfce4 \ 
+                       i3 \
+                       tigervnc-common \
+                       tigervnc-standalone-server && \
+	apt-get clean
+   `

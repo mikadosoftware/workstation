@@ -1,0 +1,54 @@
+# build the basic development world
+RUN apt-get update && \
+    apt-get install -y apt-transport-https \
+                       build-essential \
+                       build-essential \
+                       dbus-x11 \
+                       dos2unix \
+                       fonts-inconsolata \
+                       git \
+                       openssh-server \
+                       software-properties-common \
+                       wget curl \
+                       x11-apps \
+                       && \
+	apt-get clean
+
+# We add some tools
+RUN     \
+        echo "Install some tools" >&2                      \
+        && apt-get update                                  \
+        && apt-get install -y --no-install-recommends      \
+          curl                                             \
+          dumb-init                                        \
+          figlet                                           \
+          jq                                               \
+          libnss3-tools                                    \
+          mlocate                                          \
+          net-tools                                        \
+          vim                                              \
+          vlc                                              \
+          xz-utils                                         \
+          zip                                              \
+        && apt-get install -y thunar-archive-plugin        \
+        && apt-get clean                                   \
+        && apt-get autoremove -y                           \
+        && rm -rf /tmp/* /var/tmp/*                        \
+        && rm -rf /var/lib/apt/lists/* /var/cache/apt/*    \
+        && echo "Install some tools OK" >&2
+
+# We install firefox, directly from Mozilla (not from snap)
+RUN     \
+        echo "Install Firefox from Mozilla" >&2               \
+        && apt-get update                                     \
+        && add-apt-repository ppa:mozillateam/ppa             \
+        && printf '\nPackage: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001\n' > /etc/apt/preferences.d/mozilla-firefox                     \
+        && printf 'Unattended-Upgrade::Allowed-Origins:: "LP-PPA-mozillateam:${distro_codename}";' > /etc/apt/apt.conf.d/51unattended-upgrades-firefox \
+        && apt-get update                                     \
+        && apt-get install -y firefox --no-install-recommends \
+        && apt-get clean                                      \
+        && apt-get autoremove -y                              \
+        && rm -rf /tmp/* /var/tmp/*                           \
+        && rm -rf /var/lib/apt/lists/* /var/cache/apt/*       \
+        && echo "Install Firefox from Mozilla OK" >&2
+
