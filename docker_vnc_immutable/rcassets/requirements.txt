@@ -32,7 +32,7 @@ more-itertools==4.1.0
 paramiko==2.0.9
 pluggy==0.6.0
 purepng==0.2.0
-py==1.5.3
+py==1.11.0
 pycparser==2.18
 pycrypto==2.6.1
 PyGithub==1.35
