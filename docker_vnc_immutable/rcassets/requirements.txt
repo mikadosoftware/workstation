@@ -10,7 +10,7 @@ cffi
 chardet==3.0.4
 CommonMark==0.5.4
 coverage==4.5.1
-cryptography==2.3
+cryptography==39.0.1
 docopt==0.6.2
 #: pypa.readme_renderer requires docutils>0.13 else cannot package up!
 docutils>=0.14
