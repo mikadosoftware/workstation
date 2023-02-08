@@ -24,8 +24,14 @@ Secondly, I get the ratchet effect of continuously improving security
 `docker build` and I have permanently remembered to fix that security
 hole wherever I build my workstation.
 
-I use X-Forwarding to run the same visual tools, configured the same
-way, on any box I am working on, and *anything* that changes I keep in
+I have 'improved' the approach (this is many years old now), so that
+I run a complete desktop on docker, and VNC into it, from my local machine.
+THis simplifies things like looking at pdfs or html files built on the machine
+plus simplifies things like keeping my local machine updated - I can live without 
+almost any 'new stuff' on the local laptop.
+
+
+So, *anything* that changes I keep in
 source control (here in this repo) and my secrets are all stored on a
 USB key that I carry with me and plugin to the host - so my GitHub ssh
 key is on a USB stick, that when I plug it in, .
