@@ -180,14 +180,14 @@ RUN apt-get update && \
 #python3 -c "print(u''.join([u'\u0395', u'\u03c5', u'\u03c7', u'\u03B1', u'\u03c1', u'\u03B9', u'\u03C3', u'\u03c4', u'\u03c9']))"
 
 ## fonts
-RUN apt-get -y install fonts-inconsolata
+RUN apt-get -y install fonts-inconsolata && apt-get clean
 
 ENV TZ=Europe/London
-#not ideal
 ENV DEBIAN_FRONTEND=noninteractive
 RUN DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
-    apt-get install -y tzdata
+    apt-get install -y tzdata \
+    && apt-get clean
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
@@ -197,7 +197,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
 
 
 ### Other Dev Tools
-RUN apt-get install -y	whois
+RUN apt-get install -y	whois 
 
 
 
@@ -209,8 +209,47 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
 && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
 && apt update \
-&& apt install gh -y
+&& apt install gh -y \
+&& apt-get clean
 
+RUN echo "READY TO DO PYTHON"
+###### Install with apt
+RUN apt-get install -y libpython3.10 \
+                       python3.10 \
+                       python3-pip \
+		       && apt-get clean
+
+###### symlinking to have `pip` and `python`
+RUN cd /usr/bin \
+       && ln -sf python3.10 python \
+       && ln -sf python3.10 python3 \
+       && ln -sf pip3 pip
+
+#####
+RUN python3 -m pip install --upgrade pip
+#RUN python3 -m pip install pygithub
+
+### update python pkgs
+# Install any needed packages (ie above those for the runtime)
+RUN pip install --trusted-host pypi.python.org sphinx \
+                                               pytest \
+					       pylint
+
+
+# install requirements file. (why not specify in thisfile???)
+COPY rcassets/requirements.txt $WKDIR/
+COPY rcassets/unpinned_requirements.txt $WKDIR/
+
+#RUN pip install -r $WKDIR/requirements.txt
+RUN pip install -r $WKDIR/unpinned_requirements.txt
+# Additonal setup for spacy.  I think this is sensible to do specify in this file them
+#RUN python -m spacy download en
+RUN echo "READY TO DO PYTHON END"
+# seems ubunut installs pip_internal again mucking things up
+
+# lastly redo symlinks
+RUN rm /usr/bin/python
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 
 

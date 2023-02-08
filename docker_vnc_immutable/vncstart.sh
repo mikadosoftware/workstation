@@ -4,7 +4,9 @@ catch_err() {
 }
 
 trap 'catch_err' ERR
-
+# remove any stopped, old versions of the container that prevent rerunning
+# best to provide new name
+podman container prune
 podman run --rm                    \
   --interactive                    \
   --tty                            \
