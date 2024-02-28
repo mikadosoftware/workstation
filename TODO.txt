@@ -4,3 +4,9 @@
 [x] Easier killing of docker instances
 [X] have a minimal example .latest so can start from scratch then have "my" one in my own location.  test this on clean instances.
 
+[ ] setup dropbox
+[ ] setup two huge back disk for all photos
+[ ] create a dockerfile that builds a terminal only development environment
+[ ] and a terminal first user environment (dropbox, firefox, etc.)
+[ ] sahre files with shhfs FUSE between dev env and user env
+[ ] how to have dockerenv --editable python venvs

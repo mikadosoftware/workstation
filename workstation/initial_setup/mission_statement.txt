@@ -1,0 +1,4 @@
+Laptop Workstation Plan
+=======================
+
+I want to have arepeateable builds for a laptop / workstation. 
