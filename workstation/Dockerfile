@@ -2,8 +2,8 @@
 FROM    ubuntu:jammy
 LABEL   maintainer="cyd@9bis.com"
 
-ARG     PROXY_CERT 
-RUN     test -z "${PROXY_CERT}" || { echo "${PROXY_CERT}" | base64 -d | tee /usr/local/share/ca-certificates/ca-local.crt > /dev/null && update-ca-certificates ; }
+#ARG     PROXY_CERT 
+#RUN     test -z "${PROXY_CERT}" || { echo "${PROXY_CERT}" | base64 -d | tee /usr/local/share/ca-certificates/ca-local.crt > /dev/null && update-ca-certificates ; }
 
 # We prepare environment
 ARG     TZ=${TZ:-Etc/UTC}
@@ -14,53 +14,17 @@ RUN     \
         && apt-get install -y                              \
           apt-utils                                        \
           software-properties-common                       \
-          tzdata                                           \
+          tzdata sudo                                          \
         && apt-get clean                                   \
         && apt-get autoremove -y                           \
         && rm -rf /tmp/* /var/tmp/*                        \
         && rm -rf /var/lib/apt/lists/* /var/cache/apt/*    \
         && echo "Timezone and locale OK" >&2
 
-# Second we install VNC, noVNC and websockify
-RUN     \
-        echo "install VNC, noVNC and websockify" >&2       \
-        && apt-get update                                  \
-        && apt-get install -y --no-install-recommends      \
-          libpulse0                                        \
-          x11vnc                                           \
-          xvfb                                             \
-        && apt-get clean                                   \
-        && apt-get autoremove -y                           \
-        && rm -rf /tmp/* /var/tmp/*                        \
-        && rm -rf /var/lib/apt/lists/* /var/cache/apt/*    \
-        && echo "install VNC OK" >&2
-
-# And finally xfce4 and ratpoison desktop environments
-RUN     \
-        echo "Install xfce4 " >&2             \
-        && apt-get update                                  \
-        && apt-get install -y --no-install-recommends      \
-          dbus-x11                                         \
-        && apt-get install -y                              \
-          xfce4 xfce4-terminal xfce4-eyes-plugin           \
-          xfce4-systemload-plugin xfce4-weather-plugin     \
-          xfce4-whiskermenu-plugin xfce4-clipman-plugin    \
-          xserver-xorg-video-dummy                         \
-        && apt-get clean                                   \
-        && apt-get autoremove -y                           \
-        && rm -rf /tmp/* /var/tmp/*                        \
-        && rm -rf /var/lib/apt/lists/* /var/cache/apt/*    \
-        && echo "Install xfce4  OK" >&2
-
-
-# We can add additional GUI programs
-# Templates can be added here
 
 
 
-### {{ user }}
 
-#RUN apt-get install sudo
 
 # We add a simple user with sudo rights
 ENV     USERNAME=pbrian
@@ -89,17 +53,11 @@ RUN echo "export LC_LANGUAGE=en_GB.UTF-8" >> $USERHOME/.bashrc
 # as such this is a "safe" image to keep on say a hub
 # COPY rcassets/.emacs $USERHOME
 # COPY rcassets/.pylintrc $USERHOME
-COPY rcassets/.gitconfig $USERHOME
-COPY rcassets/.ssh $USERHOME/.ssh
-RUN chown -R $USERNAME:$USERNAME $USERHOME/.ssh
-RUN chown -R $USERNAME:$USERNAME $USERHOME/.gitconfig
-
-#COPY rcassets/ENTRYPOINT.sh $USERHOME
-#COPY rcassets/ENTRYPOINT.sh $USERHOME
-#RUN chmod 0777 $USERHOME/ENTRYPOINT.sh
-
-
-
+#COPY rcassets/.gitconfig $USERHOME
+#COPY rcassets/.ssh $USERHOME/.ssh
+#RUN chown -R $USERNAME:$USERNAME $USERHOME/.ssh
+#RUN chown -R $USERNAME:$USERNAME $USERHOME/.gitconfig
+#
 
 ### {{ apt }}
 
@@ -107,15 +65,10 @@ RUN chown -R $USERNAME:$USERNAME $USERHOME/.gitconfig
 RUN apt-get update && \
     apt-get install -y apt-transport-https \
                        build-essential \
-                       build-essential \
-                       dbus-x11 \
                        dos2unix \
-                       fonts-inconsolata \
                        git \
                        openssh-server \
-                       software-properties-common \
                        wget curl \
-                       x11-apps \
                        && \
 	apt-get clean
 
@@ -126,13 +79,10 @@ RUN     \
         && apt-get install -y --no-install-recommends      \
           curl                                             \
           dumb-init                                        \
-          figlet                                           \
           jq                                               \
           libnss3-tools                                    \
           mlocate                                          \
           net-tools                                        \
-          vim                                              \
-          vlc                                              \
           xz-utils                                         \
           zip                                              \
         && apt-get install -y thunar-archive-plugin        \
@@ -141,24 +91,6 @@ RUN     \
         && rm -rf /tmp/* /var/tmp/*                        \
         && rm -rf /var/lib/apt/lists/* /var/cache/apt/*    \
         && echo "Install some tools OK" >&2
-
-# We install firefox, directly from Mozilla (not from snap)
-RUN     \
-        echo "Install Firefox from Mozilla" >&2               \
-        && apt-get update                                     \
-        && add-apt-repository ppa:mozillateam/ppa             \
-        && printf '\nPackage: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001\n' > /etc/apt/preferences.d/mozilla-firefox                     \
-        && printf 'Unattended-Upgrade::Allowed-Origins:: "LP-PPA-mozillateam:${distro_codename}";' > /etc/apt/apt.conf.d/51unattended-upgrades-firefox \
-        && apt-get update                                     \
-        && apt-get install -y firefox --no-install-recommends \
-        && apt-get clean                                      \
-        && apt-get autoremove -y                              \
-        && rm -rf /tmp/* /var/tmp/*                           \
-        && rm -rf /var/lib/apt/lists/* /var/cache/apt/*       \
-        && echo "Install Firefox from Mozilla OK" >&2
-
-
-
 
 ### {{ baseconfig }}
 
@@ -236,10 +168,6 @@ RUN pip install --trusted-host pypi.python.org sphinx \
 					       pylint
 
 
-# install requirements file. (why not specify in thisfile???)
-COPY rcassets/requirements.txt $WKDIR/
-COPY rcassets/unpinned_requirements.txt $WKDIR/
-
 #RUN pip install -r $WKDIR/requirements.txt
 RUN pip install -r $WKDIR/unpinned_requirements.txt
 # Additonal setup for spacy.  I think this is sensible to do specify in this file them
@@ -260,9 +188,6 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN adduser root pulse-access
 RUN     printf 'default-server = unix:/run/user/1000/pulse/native\nautospawn = no\ndaemon-binary = /bin/true\nenable-shm = false' > /etc/pulse/client.conf
 
-
-# Two ports are availables: 5900 for VNC client, and 6080 for browser access via websockify
-EXPOSE  5900
 
 # We set localtime
 RUN      if [ "X${TZ}" != "X" ] ; then if [ -f /usr/share/zoneinfo/${TZ} ] ; then rm -f /etc/localtime ; ln -s /usr/share/zoneinfo/${TZ} /etc/localtime ; fi ; fi
