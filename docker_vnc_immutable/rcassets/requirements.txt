@@ -57,7 +57,7 @@ snowballstemmer==1.2.1
 Sphinx==1.4.8
 todoinator==0.0.1
 tox==3.0.0
-urllib3==1.23
+urllib3==1.26.5
 virtualenv==15.2.0
 wrapt==1.10.11
 oauth2client
