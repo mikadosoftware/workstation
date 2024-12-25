@@ -1,0 +1,6 @@
+Trying to follow along on my nix journey
+
+* I am starting with home-manager, mostly because nixos wont build on my 4GB
+  laptop
+
+
